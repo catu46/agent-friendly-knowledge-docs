@@ -132,7 +132,8 @@ to **skip**, not what to open.
 Understanding a real, messy tree is **iterative, not linear phases.** Interview and reading are **co-equal**:
 reading reveals WHAT IS; the human reveals WHAT MATTERS and WHAT'S STILL TRUE.
 
-1. **Interview** (in the user's language): goals, what to **SKIP** (required exclusion step), what's stale.
+1. **Interview** (in the user's language): goals, what to **SKIP** (required exclusion step), what's stale, and
+   the **KEEP-vs-REDESIGN question** (below — ask it explicitly, early).
 2. **Read**: survey the tree, then read the **content** the answers point to — by default.
 3. **Re-interview**, sharper and evidence-based: *"you said the Q3 model is canonical, but there's v8,
    v8_FINAL, v8_FINAL_real — which? this note claims X but the deck shows Y — stale?"*
@@ -187,6 +188,28 @@ reading reveals WHAT IS; the human reveals WHAT MATTERS and WHAT'S STILL TRUE.
    update the notes — you don't have to do anything."* (Only a clearly technical user, or one who says they
    don't want it, gets a choice.) **Done when** `snapshot.py check <root>` is wired into both the hooks and the
    launcher.
+
+### Keep the organization, or redesign it? (ask this early)
+
+Two very different jobs hide behind "organize my folders," and the user must pick — **ask explicitly, up front,
+in step 1**, because it changes everything downstream:
+
+- **KEEP (the default).** The folders are already organized the way the user likes; the job is just to make
+  them **agent-navigable and self-maintaining** — layer the docs (`AGENTS.md` / `index.md` / `log.md` /
+  snapshot) **on top, without moving or renaming a single file.** This is the safe default; if the user doesn't
+  clearly ask for a redesign, do this.
+- **REDESIGN.** The user wants the *structure itself* rethought (merge folders, split, rename, refile). This
+  **moves user files — it is DESTRUCTIVE**, so:
+  - **Propose the new tree first and get explicit confirmation** before moving anything. Show the before→after.
+  - **Preserve, never delete:** move (don't delete) into the new structure, keep the ORIGINAL arrangement
+    recoverable (a copy/backup, or rely on Drive/SharePoint version history) until the user validates it, and
+    record the reshape in `log.md`.
+  - **Extra caution on shared Drive/SharePoint:** moving or renaming a file **breaks the links and muscle
+    memory of everyone else who uses that folder.** Warn the user plainly, and prefer the lightest reshape that
+    achieves the goal. When in doubt, KEEP.
+
+Whichever they pick, the docs (`index.md` / `log.md` / routers) are built the same way; only whether you
+*rearrange the files first* differs.
 
 **At scale (hundreds of folders), DECENTRALIZE:** one subagent per leaf folder writes that folder's docs; roll
 summaries leaf → mid → root so no context ever holds the whole tree.
