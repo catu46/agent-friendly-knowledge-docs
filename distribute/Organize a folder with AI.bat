@@ -26,11 +26,15 @@ echo    ----------------------------------------------
 echo(
 
 REM 1) Install the skill for both assistants.
-if exist "%SKILL_DIR%\SKILL.md" (
+REM The skill files may sit next to this app, or one level up (app in distribute\).
+set "SKILL_ROOT="
+if exist "%SKILL_DIR%\SKILL.md" set "SKILL_ROOT=%SKILL_DIR%"
+if not defined SKILL_ROOT for %%I in ("%SKILL_DIR%\..") do if exist "%%~fI\SKILL.md" set "SKILL_ROOT=%%~fI"
+if defined SKILL_ROOT (
   REM Running from inside the skill repo -> junction this copy (no admin needed).
   for %%B in ("%USERPROFILE%\.claude\skills" "%USERPROFILE%\.agents\skills") do (
     if not exist "%%~B" mkdir "%%~B"
-    if not exist "%%~B\%SKILL_NAME%" mklink /J "%%~B\%SKILL_NAME%" "%SKILL_DIR%" >nul 2>nul
+    if not exist "%%~B\%SKILL_NAME%" mklink /J "%%~B\%SKILL_NAME%" "%SKILL_ROOT%" >nul 2>nul
   )
 ) else (
   REM Handed as a standalone file -> download the skill once from GitHub.

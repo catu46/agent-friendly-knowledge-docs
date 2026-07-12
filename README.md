@@ -65,11 +65,12 @@ not the machine room.
 
 ## Hand it to a colleague — the "Organize a folder with AI" app
 
-At the repo root are two self-contained apps — **`Organize a folder with AI.command`** (macOS) and
-**`Organize a folder with AI.bat`** (Windows) — plus a plain-language **[`READ ME - How to use.txt`](READ%20ME%20-%20How%20to%20use.txt)**.
-Send someone **just that one file** (Teams, email, Drive). On first run it **installs the skill itself** — using
-the copy next to it if they cloned the whole repo, otherwise **downloading it from GitHub** — then opens a folder
-picker, lets them pick Claude Code or Codex, and applies the skill to the folder they chose. No terminal
+Everything for sharing lives in **[`distribute/`](distribute/)**: two self-contained apps —
+**`Organize a folder with AI.command`** (macOS) and **`Organize a folder with AI.bat`** (Windows) — plus a
+plain-language how-to (**[`distribute/README.md`](distribute/README.md)**, and a `.txt` copy to open locally).
+Send someone **just the one file** for their OS (Teams, email, Drive). On first run it **installs the skill
+itself** — using the copy in the repo if they cloned it, otherwise **downloading it from GitHub** — then opens a
+folder picker, lets them pick Claude Code or Codex, and applies the skill to the folder they chose. No terminal
 commands, ever.
 
 - **First open:** a one-time OS safety prompt (macOS: right-click → **Open**; Windows: **More info → Run anyway**).

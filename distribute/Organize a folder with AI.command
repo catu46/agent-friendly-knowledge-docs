@@ -25,11 +25,16 @@ printf '   organized. Two clicks: pick the folder, pick the assistant.\n\n'
 printf '   %s──────────────────────────────────────────────%s\n\n' "$DIM" "$R"
 
 # 1) Install the skill for both assistants (idempotent).
-if [ -f "$SKILL_DIR/SKILL.md" ]; then
+# The skill files may sit next to this app, or one level up (app lives in distribute/).
+if [ -f "$SKILL_DIR/SKILL.md" ]; then SKILL_ROOT="$SKILL_DIR"
+elif [ -f "$SKILL_DIR/../SKILL.md" ]; then SKILL_ROOT="$(cd "$SKILL_DIR/.." && pwd)"
+else SKILL_ROOT=""; fi
+
+if [ -n "$SKILL_ROOT" ]; then
   # Running from inside the skill repo → link this copy.
   for base in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
     mkdir -p "$base"
-    [ -e "$base/$SKILL_NAME" ] || ln -s "$SKILL_DIR" "$base/$SKILL_NAME" 2>/dev/null
+    [ -e "$base/$SKILL_NAME" ] || ln -s "$SKILL_ROOT" "$base/$SKILL_NAME" 2>/dev/null
   done
 else
   # Handed as a standalone file → download the skill once from GitHub.
