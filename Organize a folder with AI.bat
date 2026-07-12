@@ -48,18 +48,33 @@ if exist "%SKILL_DIR%\SKILL.md" (
 )
 echo(
 
-REM 1b) Python powers the automatic "what changed" tracking + checks. Not required to
-REM set up or chat, but without it that tracking stays off. Detect + guide (don't block).
+REM 1b) Python powers the automatic "what changed" tracking + checks. Offer to install
+REM it via winget (the Windows Package Manager), else fall back to the download page.
 set HAVE_PY=0
 where python  >nul 2>nul && set HAVE_PY=1
 where python3 >nul 2>nul && set HAVE_PY=1
-if "%HAVE_PY%"=="0" (
-  echo    Heads up: Python isn't installed -- the automatic change-tracking needs it.
-  echo    Get it here, then run this again for full tracking:
-  echo    https://www.python.org/downloads/
+if "%HAVE_PY%"=="1" goto py_ok
+echo    Python isn't installed -- it powers the automatic change-tracking.
+choice /c yn /n /m "   Install it now? [y] yes / [n] skip: "
+if errorlevel 2 goto py_skip
+where winget >nul 2>nul
+if errorlevel 1 (
+  echo    Opening the Python download page ^(winget isn't available^)...
   start "" "https://www.python.org/downloads/"
-  echo(
+  echo    After installing, close this window and double-click again.
+  pause
+  exit /b 0
 )
+echo    Installing Python via winget...
+winget install -e --id Python.Python.3 --accept-source-agreements --accept-package-agreements
+echo(
+echo    Done. Please close this window and double-click again.
+pause
+exit /b 0
+:py_skip
+echo    OK, skipping -- tracking stays off until Python is installed.
+echo(
+:py_ok
 
 REM 2) Native folder picker.
 echo    Opening a window to choose the folder...

@@ -50,13 +50,31 @@ else
   [ -e "$HOME/.claude/skills/$SKILL_NAME" ] || ln -s "$SKILL_HOME" "$HOME/.claude/skills/$SKILL_NAME"
 fi
 
-# 1b) Python powers the automatic "what changed" tracking + checks. Not required to
-# set up or chat, but without it that tracking stays off. Detect + guide (don't block).
+# 1b) Python powers the automatic "what changed" tracking + checks. Offer to install
+# it via the native macOS installer (Command Line Tools, which include python3).
 if ! command -v python3 >/dev/null 2>&1; then
-  printf '   %sHeads up:%s Python isn'\''t installed — the automatic change-tracking needs it.\n' "$B" "$R"
-  printf '   %sGet it here, then run this again for full tracking:%s\n' "$DIM" "$R"
-  printf '   %shttps://www.python.org/downloads/%s\n\n' "$BLUE" "$R"
-  open "https://www.python.org/downloads/" >/dev/null 2>&1
+  printf '   %sPython isn'\''t installed%s — it powers the automatic change-tracking.\n' "$B" "$R"
+  printf '   Install it now?  %s[y]%s yes   /   %s[n]%s skip for now: ' "$B" "$R" "$B" "$R"
+  read -r pyans
+  printf '\n'
+  case "$pyans" in
+    y|Y|s|S|yes|sim)
+      # xcode-select --install pops the native GUI installer and provides python3.
+      if xcode-select --install 2>/dev/null; then
+        printf '   %sClick "Install" in the window that just popped up and let it finish%s\n' "$DIM" "$R"
+        printf '   %s(a few minutes). Then double-click this app again.%s\n\n' "$DIM" "$R"
+      else
+        # Tools already present but no python3, or the trigger failed → use python.org.
+        printf '   %sOpening the Python download page instead…%s\n\n' "$DIM" "$R"
+        open "https://www.python.org/downloads/" >/dev/null 2>&1
+      fi
+      printf '   %s(You can close this window.)%s\n\n' "$DIM" "$R"
+      exit 0
+      ;;
+    *)
+      printf '   %sOK, skipping — the automatic tracking stays off until Python is installed.%s\n\n' "$DIM" "$R"
+      ;;
+  esac
 fi
 
 # 2) Native folder picker.
