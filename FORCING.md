@@ -46,6 +46,9 @@ before handing off to the chat. Belt and suspenders for whichever assistant the 
 
 - The gate **detects and blocks**; the assistant still does the actual reconcile. That's the correct division —
   detection is deterministic, summarization is judgment.
+- **Expect questions.** When the gate flags a NEW or unfamiliar folder, the assistant should **ask the user
+  what it is** before documenting it — it must not invent an `index.md` for a folder it doesn't understand.
+  Being asked "what is this folder?" is the system working, not a bug.
 - Hooks bind to **this folder** (project-level `.claude/settings.json`); they don't affect the user's other
   work.
 - Under **Codex**, only the launcher banner fires (no Stop-block). That's the honest ceiling of a non-Claude

@@ -108,7 +108,9 @@ docs with the real files before doing anything else that depends on them:
    `log.md`, and restamp `timestamp`. A rename → repoint the entry, don't record it as delete + new.
 4. Refresh the memory: `python3 <skill-dir>/scripts/snapshot.py write .`.
 5. If a new folder of documents appeared with no docs, scaffold it (CLAUDE.md + AGENTS.md + index.md + log.md
-   + snapshot). When anything is unclear, ASK the user here in the chat — don't guess, don't defer to a file.
+   + snapshot). **But if you can't tell what a folder is for — what's in it, who owns it, whether it even
+   belongs in these docs — ASK the user before scaffolding it. Never invent an `index.md` for a folder you
+   don't understand.** When anything is unclear, ask here in the chat; don't guess, don't defer to a file.
 ~~~
 
 ---
