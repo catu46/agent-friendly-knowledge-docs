@@ -15,6 +15,39 @@ other belongs to the heavier sibling skill
 [`agent-friendly-docs`](https://github.com/catu46/agent-friendly-docs) — this one is for the filing cabinet,
 not the machine room.
 
+## When to use it
+
+✅ **Reach for it when:**
+- You have **folders of documents** — decks, spreadsheets, PDFs, proposals, notes — filed by topic, and you
+  want an AI to navigate them and answer questions about them.
+- Those folders live on **Drive / SharePoint and are shared with a team** — several non-technical people edit
+  them outside any IDE. (This is the sweet spot: the notes live *in* each folder, so they travel with the files,
+  respect per-folder permissions, and don't fight over one central file.)
+- You want the docs to **stay current on their own** as people add and change files — without you maintaining a
+  wiki by hand.
+
+🚫 **Don't use it when:**
+- The folder is a **dense codebase or an interdependent system that RUNS** (code, SQL, versioned pipelines) →
+  use the heavier sibling [`agent-friendly-docs`](https://github.com/catu46/agent-friendly-docs) instead.
+- It's a **single throwaway file** — there's no tree to organize.
+
+## How to use it — start to finish
+
+1. **Install once.** Either symlink the skill (see *Install* below), or hand someone the one-click
+   **"Organize a folder with AI"** app — it self-installs the skill on first run. (One-time: the person also
+   needs Claude Code or Codex installed + logged in.)
+2. **Point it at a folder.** In the chat just say *"organize this folder for AI"* (or double-click the app and
+   pick the folder). It **interviews you** (what's the goal, what to skip, which version is canonical), reads
+   the files, builds a readable `index.md` + `log.md` + router in each folder, and drops the **"Talk to my
+   files"** launcher — then proves it works with a fresh-eyes test.
+3. **Use it day to day.** Double-click **"Talk to my files"** inside the folder → the chat opens right there.
+   Ask *"summarize the Acme proposal"*, *"which is the latest model?"*, *"draft a reply about X"*.
+4. **Let it stay current.** Next time you (or a teammate) opens it, ask *"what changed while I was away?"* — it
+   catches up on edits made by **anyone**, outside the chat (a new deck, an Excel re-saved, a Drive rename),
+   tells you in plain words, and updates the notes on your OK.
+5. **Grow it without thinking.** Create new folders / files as usual; keep working through the chat and it
+   scaffolds and updates the docs for you (it asks when it's unsure what a new folder is).
+
 ## What you get
 
 1. **Organized docs in every folder** — a thin router (`AGENTS.md`), a one-line bridge (`CLAUDE.md`), a
