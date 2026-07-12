@@ -311,6 +311,12 @@ keep it here. Clarity over machinery; escalate only when the density actually de
   on demand. That lazy boundary is the whole point.
 - **The launcher does not install or log in Claude Code.** First run still needs `claude` installed and
   authenticated; the launcher removes the "open an IDE, cd, type a command" friction, not the one-time setup.
+- **Python is a real dependency for the change-memory.** `snapshot.py` (catch-up) and `validate.py` (shape
+  check) need `python3` — and a fresh Mac/Windows often lacks it. **Degrade gracefully:** if `python3` isn't
+  available, still build the docs (markdown needs no Python) and still chat, but **don't error out or loop** on
+  the failed script — tell the user plainly that the automatic *what-changed* tracking and the gate turn on once
+  they install Python (https://www.python.org/downloads/). The "Organize a folder" app detects this and points
+  them there.
 - **Descriptions can drift** from the artifacts they point at — which is why every doc carries a `timestamp`
   and why the watcher exists. Plain-filesystem edits may not reveal *who* changed a file; non-git sources need
   their own "modified by"; the watcher needs read access.

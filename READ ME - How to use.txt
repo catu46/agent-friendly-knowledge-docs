@@ -16,11 +16,17 @@ STEP 1 — Put the right file on your Desktop
 
 STEP 2 — Have an assistant installed (one time only)
 ----------------------------------------------------
-You need Claude Code OR Codex installed and logged in — once per computer. If you
-don't have it yet, the app opens the install link for you. Ask a technical person
-to help the first time if needed.
-  • Claude Code:  https://claude.com/claude-code
-  • Codex:        https://learn.chatgpt.com/docs/codex/cli
+You need two things, once per computer. If either is missing, the app opens the
+install link for you. Ask a technical person to help the first time if needed.
+
+  1) An assistant — Claude Code OR Codex:
+       • Claude Code:  https://claude.com/claude-code
+       • Codex:        https://learn.chatgpt.com/docs/codex/cli
+
+  2) Python — powers the automatic "what changed" tracking:
+       • https://www.python.org/downloads/
+     (You can start without it — setup and chat still work — but the automatic
+      tracking only turns on once Python is installed.)
 
 
 STEP 3 — Use it

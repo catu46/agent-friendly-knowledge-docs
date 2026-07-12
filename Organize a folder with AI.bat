@@ -48,6 +48,19 @@ if exist "%SKILL_DIR%\SKILL.md" (
 )
 echo(
 
+REM 1b) Python powers the automatic "what changed" tracking + checks. Not required to
+REM set up or chat, but without it that tracking stays off. Detect + guide (don't block).
+set HAVE_PY=0
+where python  >nul 2>nul && set HAVE_PY=1
+where python3 >nul 2>nul && set HAVE_PY=1
+if "%HAVE_PY%"=="0" (
+  echo    Heads up: Python isn't installed -- the automatic change-tracking needs it.
+  echo    Get it here, then run this again for full tracking:
+  echo    https://www.python.org/downloads/
+  start "" "https://www.python.org/downloads/"
+  echo(
+)
+
 REM 2) Native folder picker.
 echo    Opening a window to choose the folder...
 for /f "usebackq delims=" %%I in (`powershell -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms | Out-Null; $f=New-Object System.Windows.Forms.FolderBrowserDialog; $f.Description='Which folder should the AI organize?'; if($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK){Write-Output $f.SelectedPath}"`) do set "TARGET=%%I"

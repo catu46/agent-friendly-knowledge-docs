@@ -50,6 +50,15 @@ else
   [ -e "$HOME/.claude/skills/$SKILL_NAME" ] || ln -s "$SKILL_HOME" "$HOME/.claude/skills/$SKILL_NAME"
 fi
 
+# 1b) Python powers the automatic "what changed" tracking + checks. Not required to
+# set up or chat, but without it that tracking stays off. Detect + guide (don't block).
+if ! command -v python3 >/dev/null 2>&1; then
+  printf '   %sHeads up:%s Python isn'\''t installed — the automatic change-tracking needs it.\n' "$B" "$R"
+  printf '   %sGet it here, then run this again for full tracking:%s\n' "$DIM" "$R"
+  printf '   %shttps://www.python.org/downloads/%s\n\n' "$BLUE" "$R"
+  open "https://www.python.org/downloads/" >/dev/null 2>&1
+fi
+
 # 2) Native folder picker.
 printf '   Opening a window to choose the folder…\n'
 TARGET="$(osascript -e 'try
