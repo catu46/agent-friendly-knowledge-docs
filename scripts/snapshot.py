@@ -15,8 +15,9 @@ Usage:
   python3 snapshot.py diff  <folder>     # print what changed vs the saved snapshot
   python3 snapshot.py diff  <folder> --json   # same, machine-readable
   python3 snapshot.py check <root>       # walk the TREE; exit 3 if any folder is
-                                         #   stale (docs behind the files), else 0.
-                                         #   The deterministic gate hooks call.
+                                         #   stale (docs behind the files) OR a new
+                                         #   folder has artifacts but no docs yet;
+                                         #   else 0. The gate the hooks call.
 
 `diff` reports added / modified / deleted, and detects a rename/move within the
 folder (a deleted file and an added file with the SAME sha256 = a rename, not a
@@ -198,37 +199,57 @@ def _emit_diff(folder, result, as_json, no_snapshot=False):
 
 
 def cmd_check(root):
-    """Walk the tree; for every folder that has a snapshot, diff it. Print all
-    stale folders and exit 3 if ANY are stale, 0 if all in sync. This is the
-    deterministic 'are the docs behind the files?' gate the hooks and launcher
-    call — no LLM needed to DETECT drift (only to fix it)."""
-    stale = []
+    """Walk the tree and flag two kinds of drift the docs must catch up on:
+      (1) STALE — a tracked folder whose artifacts changed since its snapshot;
+      (2) UNSCAFFOLDED — a folder that holds real artifacts but has NO docs yet
+          (a brand-new folder someone created outside the chat).
+    Exit 3 if ANYTHING is pending, 0 if the whole tree is in sync AND fully
+    scaffolded. The deterministic gate the hooks and launcher call — no LLM needed
+    to DETECT the work (only to do it)."""
+    stale = []          # (rel, added, modified, deleted)
+    unscaffolded = []   # (rel, [artifact names])
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if not d.startswith(".") and d != "_archive"]
-        if ".okf-state.json" not in filenames:
-            continue
-        old = load_snapshot(dirpath) or {}
         cur = scan(dirpath, load_okfignore(dirpath))
-        added = [n for n in cur if n not in old]
-        deleted = [n for n in old if n not in cur]
-        modified = [n for n in cur if n in old and cur[n]["sha256"] != old[n]["sha256"]
-                    and cur[n]["sha256"] != "unreadable" and old[n]["sha256"] != "unreadable"]
-        if added or deleted or modified:
-            stale.append((os.path.relpath(dirpath, root), added, modified, deleted))
-    if not stale:
-        print("Docs are in sync with the files. Nothing to reconcile.")
+        has_snapshot = ".okf-state.json" in filenames
+        has_agents = "AGENTS.md" in filenames
+
+        if has_snapshot:
+            old = load_snapshot(dirpath) or {}
+            added = [n for n in cur if n not in old]
+            deleted = [n for n in old if n not in cur]
+            modified = [n for n in cur if n in old and cur[n]["sha256"] != old[n]["sha256"]
+                        and cur[n]["sha256"] != "unreadable" and old[n]["sha256"] != "unreadable"]
+            if added or deleted or modified:
+                stale.append((os.path.relpath(dirpath, root), added, modified, deleted))
+
+        # A folder that HOLDS artifacts but isn't fully set up (no router, or no
+        # snapshot baseline) = a new/undocumented folder that needs scaffolding.
+        if cur and (not has_agents or not has_snapshot):
+            unscaffolded.append((os.path.relpath(dirpath, root), sorted(cur.keys())))
+
+    if not stale and not unscaffolded:
+        print("Docs are in sync with the files, and every folder is scaffolded. Nothing to do.")
         return 0
-    print("STALE — these folders have file changes not yet reflected in the docs:")
-    for rel, a, m, d in stale:
-        print("  %s/" % ("." if rel == "." else rel))
-        for n in a:
-            print("    added:    %s" % n)
-        for n in m:
-            print("    modified: %s" % n)
-        for n in d:
-            print("    deleted:  %s" % n)
-    print("\nReconcile: ask the assistant \"what changed?\" — it updates index.md/log.md,")
-    print("then refreshes the snapshot (snapshot.py write) which clears this.")
+
+    if stale:
+        print("STALE — these folders have file changes not yet reflected in the docs:")
+        for rel, a, m, d in stale:
+            print("  %s/" % ("." if rel == "." else rel))
+            for n in a:
+                print("    added:    %s" % n)
+            for n in m:
+                print("    modified: %s" % n)
+            for n in d:
+                print("    deleted:  %s" % n)
+    if unscaffolded:
+        print("NEW / UNSCAFFOLDED — these folders hold files but have no docs yet:")
+        for rel, arts in unscaffolded:
+            preview = ", ".join(arts[:4]) + (" …" if len(arts) > 4 else "")
+            print("  %s/   (%s)" % ("." if rel == "." else rel, preview))
+    print("\nCatch up: ask the assistant \"what changed?\" — it scaffolds new folders")
+    print("(CLAUDE.md + AGENTS.md + index.md + log.md), reconciles index.md/log.md,")
+    print("then refreshes the snapshot (snapshot.py write), which clears this gate.")
     return 3
 
 

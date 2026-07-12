@@ -5,8 +5,13 @@ needs the assistant's judgment). But it **can force the update to happen**, dete
 — so the docs can't silently rot even when the assistant forgets due to a full context window.
 
 The gate has three enforcement points, all built on **one deterministic check**:
-`python3 <hooks>/snapshot.py check <root>` → exits **3** if any folder's files changed since the docs were last
-reconciled, **0** if in sync.
+`python3 <hooks>/snapshot.py check <root>` → exits **3** if there's anything to catch up on, **0** if the tree is
+fully in sync. It flags **two** kinds of drift:
+- **STALE** — a tracked folder whose artifacts changed since its snapshot (a re-saved spreadsheet, a new/renamed
+  deck).
+- **NEW / UNSCAFFOLDED** — a folder that holds real files but has **no docs yet** — i.e. a brand-new folder
+  someone created outside the chat. This is what makes new-folder scaffolding a hard guarantee, not just a soft
+  instruction: the `Stop` hook won't let the agent finish while an undocumented folder exists.
 
 ## 1. Claude Code hooks (block the chat) — the primary force
 
