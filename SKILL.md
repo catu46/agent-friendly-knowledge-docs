@@ -198,15 +198,31 @@ in step 1**, because it changes everything downstream:
   them **agent-navigable and self-maintaining** — layer the docs (`AGENTS.md` / `index.md` / `log.md` /
   snapshot) **on top, without moving or renaming a single file.** This is the safe default; if the user doesn't
   clearly ask for a redesign, do this.
-- **REDESIGN.** The user wants the *structure itself* rethought (merge folders, split, rename, refile). This
-  **moves user files — it is DESTRUCTIVE**, so:
-  - **Propose the new tree first and get explicit confirmation** before moving anything. Show the before→after.
-  - **Preserve, never delete:** move (don't delete) into the new structure, keep the ORIGINAL arrangement
-    recoverable (a copy/backup, or rely on Drive/SharePoint version history) until the user validates it, and
-    record the reshape in `log.md`.
-  - **Extra caution on shared Drive/SharePoint:** moving or renaming a file **breaks the links and muscle
-    memory of everyone else who uses that folder.** Warn the user plainly, and prefer the lightest reshape that
-    achieves the goal. When in doubt, KEEP.
+- **REDESIGN.** The user wants the *structure itself* rethought (merge, split, rename, refile). This is an
+  **information-architecture exercise, not a file move** — and because it **moves user files it is
+  DESTRUCTIVE**, so it gets its own flow. Do NOT rearrange on instinct; run these phases:
+
+  1. **MAP.** Inventory the whole tree by reading **content, not filenames** — group by what things actually
+     ARE, and surface the mess: duplicates & versions (`v8`, `v8_final`, `v8_final_real`), orphans nothing
+     references, misfiled items, stale files, inconsistent names, and sprawl / too-deep nesting. Show the user
+     what they *actually* have (they're usually surprised).
+  2. **UNDERSTAND the mental model** (interview): *How do you think about this work — by client? project? phase?
+     deliverable type? date?* *When you go looking for something, what do you search by?* (that reveals the
+     natural top level). *Who ELSE uses these folders, and how do THEY look?* (shared Drive/SharePoint — design
+     for them too, not just this user). *What's the lifecycle* (draft → final → sent → archived) and *what's
+     canonical vs scratch?*
+  3. **DIAGNOSE.** Name the specific problems, framed against that mental model — e.g. *"you think by client,
+     but the top level is by file-type, which is why you hunt."* Confirm which problems actually matter; don't
+     fix what isn't broken.
+  4. **PROPOSE.** Pick **ONE primary organizing axis** (the "grain") that matches how people retrieve — this is
+     the single biggest decision; don't organize by three axes at once. Draw a concrete **before → after** tree,
+     set naming/versioning conventions and where `archive/` and scratch live, and keep it **shallow** (fewer
+     clicks). Offer a second option only if there's a real fork.
+  5. **CONFIRM, then APPLY carefully.** Get an explicit yes on the before→after. Then **move (never delete)**,
+     keep the ORIGINAL arrangement recoverable (a backup, or Drive/SharePoint version history) until the user
+     validates, and **log every move**. On shared folders, **warn plainly that moving/renaming breaks everyone
+     else's links and muscle memory** — prefer the lightest reshape that does the job, and leave a short "moved →
+     new location" note where it helps. Build the docs on the NEW tree and fresh-eyes verify. When in doubt, KEEP.
 
 Whichever they pick, the docs (`index.md` / `log.md` / routers) are built the same way; only whether you
 *rearrange the files first* differs.
