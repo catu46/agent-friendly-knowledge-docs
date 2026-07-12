@@ -64,17 +64,16 @@ spots. Then walk up to `../AGENTS.md` only if the change affects global rules or
 
 Add this section to the **root** `AGENTS.md` **only** (it sets the voice for the whole tree). It makes the
 in-app chat feel like a friendly assistant instead of a developer tool — the reason a non-technical person can
-use the launcher without being scared. Write it in the **user's** language; the block below is Portuguese for a
-Portuguese-speaking consultant — translate to match.
+use the launcher without being scared.
 
 ~~~md
-## Como falar com a pessoa
-- Responda **na língua da pessoa** e em **linguagem simples** — sem jargão técnico, sem termos de programação.
-- Seja **conciso e gentil**. Explique o que você vai fazer em uma frase antes de fazer.
-- **Confirme antes de qualquer coisa destrutiva**: apagar, sobrescrever um arquivo original, ou enviar algo
-  para fora. Para ações seguras e reversíveis (ler, resumir, criar um arquivo novo), pode seguir.
-- Se algo estiver ambíguo (qual versão? qual cliente?), **pergunte** em vez de adivinhar.
-- Nunca mexa no que está listado em "Do NOT touch".
+## How to talk to the user
+- Reply **in the language the user writes in**, in **plain words** — no jargon, no programming terms.
+- Be **concise and kind**. Say what you're about to do in one sentence before doing it.
+- **Confirm before anything destructive**: deleting, overwriting an original file, or sending anything out.
+  For safe, reversible actions (reading, summarizing, creating a new file), go ahead.
+- If something is ambiguous (which version? which client?), **ask** instead of guessing.
+- Never touch anything listed under "Do NOT touch".
 ~~~
 
 ---
@@ -135,9 +134,9 @@ timestamp: 2026-07-01T12:00:00Z
 
 Append-only. Newest first. Never rewrite a past line.
 
-- 2026-06-28T10:00:00Z — modelo v7→v8: NRR passou a excluir one-offs (superestimava retenção).
-  v7 arquivada em _archive/modelo_q3_v7.xlsx. (Fulano, via Drive)
-- 2026-05-10T09:00:00Z — modelo v7 criado.
+- 2026-06-28T10:00:00Z — model v7→v8: NRR now excludes one-offs (it was overstating retention).
+  v7 archived to _archive/model_q3_v7.xlsx. (J. Smith, via Drive)
+- 2026-05-10T09:00:00Z — model v7 created.
 ~~~
 
 ---
@@ -148,7 +147,7 @@ Append-only. Newest first. Never rewrite a past line.
 {
   "generated": "2026-07-01T12:00:00Z",
   "files": [
-    { "path": "modelo_q3_v8.xlsx", "sha256": "<hex>", "mtime": 1782900000, "size": 184320 }
+    { "path": "model_q3_v8.xlsx", "sha256": "<hex>", "mtime": 1782900000, "size": 184320 }
   ]
 }
 ~~~
@@ -159,14 +158,14 @@ Append-only. Newest first. Never rewrite a past line.
 
 ```
 your-folder/
-├── Falar com meus arquivos.command   # Mac launcher (root only — see LAUNCHER.md)
-├── Falar com meus arquivos.bat       # Windows launcher (root only)
+├── Talk to my files.command   # Mac launcher (root only — see LAUNCHER.md)
+├── Talk to my files.bat       # Windows launcher (root only)
 ├── CLAUDE.md            # @AGENTS.md
 ├── AGENTS.md            # thin router (Rules + pointers + Keep current + tone block at root)
 ├── index.md            # the folder's knowledge (inline)
 ├── log.md              # append-only history
 ├── .okf-state.json     # watcher snapshot
-├── _archive/           # old artifacts kept for recall (e.g. modelo_q3_v7.xlsx)
+├── _archive/           # old artifacts kept for recall (e.g. model_q3_v7.xlsx)
 └── subfolder/          # every meaningful subfolder is self-contained:
     ├── CLAUDE.md       #   open it alone and its context still auto-loads
     ├── AGENTS.md       #   (carries its own "If you opened only this folder" up-pointer)

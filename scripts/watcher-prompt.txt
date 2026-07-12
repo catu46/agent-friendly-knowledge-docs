@@ -72,7 +72,7 @@ anyone, through any tool.
        leave "## What's here" pointing at a file that no longer exists.
      - new-file -> add one line under index.md's "## What's here".
      - structural -> edit the affected index.md section so it matches the new
-       schema/abas/slide structure.
+       schema/tabs/slide structure.
      - deletion -> mark the entry removed in "## What's here" (never silently drop
        the line); archive recoverable bytes and note where, else say plainly gone.
    ALWAYS: append one reverse-chronological line to log.md (timestamp, what

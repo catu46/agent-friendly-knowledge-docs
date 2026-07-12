@@ -18,9 +18,9 @@ cabinet, not the machine.
 1. **Organized docs in every folder** — a thin router (`AGENTS.md`), a one-line bridge (`CLAUDE.md`), a
    readable `index.md` (what's here, where the real files live, the definitions), and an append-only `log.md`
    (what changed and why). Small, human-readable, and structured so an AI loads only what it needs.
-2. **A one-click launcher — "Falar com meus arquivos"** — dropped in the top folder. Double-click it and you're
-   talking to your files. No VS Code, no terminal commands. Just ask *"resume a proposta do cliente X"* or
-   *"qual a versão mais recente do modelo?"*
+2. **A one-click launcher — "Talk to my files"** — dropped in the top folder. Double-click it, pick your
+   assistant (Claude Code or Codex), and you're talking to your files. No VS Code, no terminal commands. Just
+   ask *"summarize the proposal for client X"* or *"which is the latest version of the model?"*
 3. **A watcher that keeps it current** — a scheduled agent that notices when files change *outside* the
    assistant (a new deck, an Excel saved as `v8`, a rename in Drive) and updates the docs, append-only, on its
    own.
@@ -34,7 +34,7 @@ git clone https://github.com/catu46/agent-friendly-knowledge-docs.git
 ln -s "$(pwd)/agent-friendly-knowledge-docs" ~/.claude/skills/agent-friendly-knowledge-docs
 ```
 
-Then, in Claude Code, just ask in your own words — *"organiza minhas pastinhas pra IA"*, *"deixa essa pasta
+Then, in Claude Code, just ask in your own words — *"organize my folders for AI"*, *"make this folder
 agent-friendly"*, *"make my documents AI-navigable"* — and the skill takes over: it interviews you, reads the
 files, proposes a structure, builds it, proves it works with a fresh-eyes test, drops the launcher, and offers
 to arm the watcher.
@@ -43,16 +43,17 @@ to arm the watcher.
 
 Two ready-made launchers ship in [`assets/`](assets/):
 
-- **Windows** — `Falar com meus arquivos.bat` (double-click in File Explorer)
-- **macOS** — `Falar com meus arquivos.command` (double-click in Finder)
+- **Windows** — `Talk to my files.bat` (double-click in File Explorer)
+- **macOS** — `Talk to my files.command` (double-click in Finder)
 
-The skill copies the right one into your top folder and translates the greeting to your language. The first
-time you open it, your OS shows a one-time safety prompt (Windows SmartScreen → *Mais informações → Executar
-assim mesmo*; macOS Gatekeeper → *right-click → Open*) — that's normal for any unsigned helper. Full details:
-[LAUNCHER.md](LAUNCHER.md).
+The skill copies the right one into your top folder. On launch it lets you pick Claude Code or Codex (whichever
+you have installed). The first time you open it, your OS shows a one-time safety prompt (Windows SmartScreen →
+*More info → Run anyway*; macOS Gatekeeper → *right-click → Open*) — that's normal for any unsigned helper.
+Full details: [LAUNCHER.md](LAUNCHER.md).
 
-> You still need **Claude Code installed and logged in once** — the launcher removes the daily friction of
-> opening an IDE and typing a command, not the one-time setup. Get it at https://claude.com/claude-code
+> You still need an assistant **installed and logged in once** — Claude Code
+> (https://claude.com/claude-code) or Codex (https://developers.openai.com/codex). The launcher removes the
+> daily friction of opening an IDE and typing a command, not the one-time setup.
 
 ## The watcher
 
