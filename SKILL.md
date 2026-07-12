@@ -158,8 +158,9 @@ reading reveals WHAT IS; the human reveals WHAT MATTERS and WHAT'S STILL TRUE.
      not a change event — no `log.md` line is required for what was already there.
 6. **Hang the front door — drop the launcher.** In the **mother (root) folder**, drop the one-click launcher
    so the user can start talking to the tree without a terminal. Details and the exact files:
-   **[LAUNCHER.md](LAUNCHER.md).** Confirm before adding it. **Done when** the launcher sits in the root,
-   is executable/de-quarantined, its English banner is intact, and the root `AGENTS.md` carries the
+   **[LAUNCHER.md](LAUNCHER.md).** **Install it by default — it's core to the skill, not an optional add-on;
+   don't ask permission, just mention in one line that it's there.** **Done when** the launcher sits in the
+   root, is executable/de-quarantined, its English banner is intact, and the root `AGENTS.md` carries the
    `## How to talk to the user` tone block.
 7. **Verify with fresh eyes — the acceptance test before self-maintenance takes over.** Deploy a subagent
    carrying **none** of this conversation's context, rooted at the built tree, as a brand-new agent who just
@@ -180,9 +181,12 @@ reading reveals WHAT IS; the human reveals WHAT MATTERS and WHAT'S STILL TRUE.
    (the agent can forget it when context is tight). Back it with a deterministic gate: drop the Claude Code
    `SessionStart` + `Stop` hooks (they run `snapshot.py check` and **block the agent from finishing** while any
    folder is stale) and wire the launcher to run the same check (which also covers Codex). Full deploy +
-   copy-paste: **[FORCING.md](FORCING.md).** **Confirm before writing `.claude/settings.json`** (it changes how
-   Claude Code behaves in the folder). **Done when** `snapshot.py check <root>` is wired into both the hooks and
-   the launcher.
+   copy-paste: **[FORCING.md](FORCING.md).** **Install this by default too — the user invoked the skill to be
+   self-maintaining, and this IS that.** Do NOT ask whether they want it; just tell them, in one plain sentence,
+   what it does — e.g. *"I also set it up so that whenever your files change, the assistant reminds itself to
+   update the notes — you don't have to do anything."* (Only a clearly technical user, or one who says they
+   don't want it, gets a choice.) **Done when** `snapshot.py check <root>` is wired into both the hooks and the
+   launcher.
 
 **At scale (hundreds of folders), DECENTRALIZE:** one subagent per leaf folder writes that folder's docs; roll
 summaries leaf → mid → root so no context ever holds the whole tree.

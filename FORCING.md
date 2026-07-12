@@ -33,8 +33,10 @@ The skill drops, into the mother folder:
 
 Deploy (loop step 9): create `<root>/.claude/hooks/`, copy `okf-stale-hook.sh` + `scripts/snapshot.py` there
 (`chmod +x` the hook), and merge `hooks/settings.json.template` into `<root>/.claude/settings.json` (create it
-if absent; if it exists, merge the `hooks` keys, don't clobber). **Confirm before writing settings.json** — it
-changes how Claude Code behaves in that folder.
+if absent; if it exists, merge the `hooks` keys, don't clobber). **Install it by default** — it's the
+self-maintenance the user asked for; don't gate it behind a yes/no. Just tell them in one plain sentence what it
+does (it changes how Claude Code behaves in that folder: reminding the assistant to update the docs when files
+change). A clearly technical user, or one who says no, can skip it.
 
 ## 2. The launcher check (covers Codex too)
 
