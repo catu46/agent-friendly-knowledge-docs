@@ -263,6 +263,31 @@ nothing). Full spec + honest limits: **[WATCHER.md](WATCHER.md).**
 
 ---
 
+## Why per-folder, not one central OKF bundle (deliberate)
+
+The knowledge lives as a flat `index.md` **in each folder, next to the files it describes** — NOT centralized
+into a single OKF bundle (that's the heavier sibling `agent-friendly-docs`). This is a deliberate fit for the
+audience: **non-engineers sharing folders on Drive / SharePoint**, edited by several people outside any IDE.
+Per-folder wins here on three concrete counts:
+
+- **Co-location.** When someone opens `Clientes/Acme/` in SharePoint, the note (`index.md`) is **right there
+  beside the decks** — not off in a separate `knowledge/` tree. More people browsing = more value in "the note
+  lives with the thing."
+- **Edit contention.** Drive/SharePoint has **no git-style merge.** A single central `index.md` / `log.md`
+  means everyone edits the same two files → conflicts. Per-folder **distributes** the edits (one person touches
+  `Acme/`, another `Beta/` — no collision). Decisive in a no-merge environment.
+- **Permissions.** Drive/SharePoint permissions are **per-folder**; a per-folder note inherits its folder's
+  permissions naturally, while a central bundle fights that (someone scoped to `Acme/` can't — or shouldn't —
+  see a central store).
+
+**Cross-tool readability is already covered:** the docs are plain markdown + YAML frontmatter behind the
+`AGENTS.md` / `CLAUDE.md` convention, so any agent (Claude Code, Codex, …) reads them without a central bundle.
+And the reconcile-on-open catch-up is built to absorb edits made by **anyone, outside the chat** — multi-person
+SharePoint is a first-class case, not an exception. Go to one central OKF bundle only for cross-**system**
+portability (export into a knowledge catalog or a third-party visualizer) — that's the sibling skill, not this one.
+
+---
+
 ## When a folder outgrows this skill
 
 `basic` is the right, simpler default. Move a specific folder to the heavier sibling skill
