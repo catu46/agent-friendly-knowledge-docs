@@ -158,8 +158,8 @@ Append-only. Newest first. Never rewrite a past line.
 
 ```
 your-folder/
-├── Talk to my files.command   # Mac launcher (root only — see LAUNCHER.md)
-├── Talk to my files.bat       # Windows launcher (root only)
+├── Talk to my files.command   # launcher — drop ONLY the one matching the OS
+│                              #   (.command on Mac, .bat on Windows). See LAUNCHER.md.
 ├── CLAUDE.md            # @AGENTS.md
 ├── AGENTS.md            # thin router (Rules + pointers + Keep current + tone block at root)
 ├── index.md            # the folder's knowledge (inline)

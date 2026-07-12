@@ -14,9 +14,9 @@ clear
 
 # Calm colors, with a fallback if the terminal doesn't support them.
 if [ -t 1 ]; then
-  B=$'\033[1m'; DIM=$'\033[2m'; BLUE=$'\033[38;5;68m'; R=$'\033[0m'
+  B=$'\033[1m'; DIM=$'\033[2m'; BLUE=$'\033[38;5;68m'; GREEN=$'\033[38;5;71m'; R=$'\033[0m'
 else
-  B=""; DIM=""; BLUE=""; R=""
+  B=""; DIM=""; BLUE=""; GREEN=""; R=""
 fi
 
 printf '\n'
@@ -30,9 +30,6 @@ printf '   %s· "what'\''s in this folder?"%s\n' "$DIM" "$R"
 printf '   %s· "summarize the proposal for client X"%s\n' "$DIM" "$R"
 printf '   %s· "which is the latest version of the model?"%s\n' "$DIM" "$R"
 printf '\n'
-printf '   %sJust type below and press Enter.%s\n' "$B" "$R"
-printf '   %s(To leave when you'\''re done, type /exit and Enter.)%s\n' "$DIM" "$R"
-printf '\n'
 printf '   %s────────────────────────────────────────────%s\n' "$DIM" "$R"
 printf '\n'
 
@@ -40,37 +37,42 @@ printf '\n'
 have_claude=0; command -v claude >/dev/null 2>&1 && have_claude=1
 have_codex=0;  command -v codex  >/dev/null 2>&1 && have_codex=1
 
-run_agent() {
-  case "$1" in
-    codex)  codex ;;
-    *)      claude ;;
-  esac
+status() {  # $1 = installed flag
+  if [ "$1" -eq 1 ]; then
+    printf '%s✓ installed%s' "$GREEN" "$R"
+  else
+    printf "%s— not installed, I'll help you set it up%s" "$DIM" "$R"
+  fi
 }
 
-if [ "$have_claude" -eq 1 ] && [ "$have_codex" -eq 1 ]; then
-  # Both installed → let the user pick at the start.
-  printf '   %sWhich assistant do you want to use?%s\n' "$B" "$R"
-  printf '   %s[1]%s Claude Code    %s[2]%s Codex\n\n' "$B" "$R" "$B" "$R"
-  printf '   Type 1 or 2 and press Enter: '
-  read -r choice
-  printf '\n'
-  case "$choice" in
-    2) run_agent codex ;;
-    *) run_agent claude ;;
-  esac
-elif [ "$have_claude" -eq 1 ]; then
-  run_agent claude
-elif [ "$have_codex" -eq 1 ]; then
-  run_agent codex
-else
-  # Neither found: a gentle message instead of a scary error.
-  printf '   %sAlmost there!%s You just need to install an assistant once.\n' "$B" "$R"
-  printf '   Ask for help installing one of these:\n'
-  printf '   %s· Claude Code — https://claude.com/claude-code%s\n' "$BLUE" "$R"
-  printf '   %s· Codex       — https://developers.openai.com/codex%s\n' "$BLUE" "$R"
-  printf '\n   Once it'\''s installed, just double-click here again.\n\n'
+# Always show the picker, marking what's installed.
+printf '   %sWhich assistant do you want to use?%s\n\n' "$B" "$R"
+printf '   %s[1]%s Claude Code   ' "$B" "$R"; status "$have_claude"; printf '\n'
+printf '   %s[2]%s Codex         ' "$B" "$R"; status "$have_codex";  printf '\n\n'
+printf '   Type 1 or 2 and press Enter: '
+read -r choice
+printf '\n'
+
+open_guide() {  # $1 = name, $2 = url
+  printf "   %s isn't installed yet.%s Opening the setup guide in your browser…\n" "$B$1" "$R"
+  printf '   %s%s%s\n\n' "$BLUE" "$2" "$R"
+  open "$2" >/dev/null 2>&1
+  printf '   First-time setup is easiest with a technical colleague. Once it'\''s\n'
+  printf '   installed, just double-click here again.\n\n'
   printf '   %s(You can close this window.)%s\n\n' "$DIM" "$R"
-  exit 0
+}
+
+case "$choice" in
+  2) sel=codex ;;
+  *) sel=claude ;;
+esac
+
+if [ "$sel" = codex ]; then
+  if [ "$have_codex" -eq 1 ]; then codex
+  else open_guide "Codex" "https://developers.openai.com/codex"; exit 0; fi
+else
+  if [ "$have_claude" -eq 1 ]; then claude
+  else open_guide "Claude Code" "https://claude.com/claude-code"; exit 0; fi
 fi
 
 # Friendly goodbye when the conversation ends.

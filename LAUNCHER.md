@@ -4,21 +4,32 @@ The front door. A non-technical person double-clicks it and talks to the folder 
 commands, no `cd`.** Under the hood it just `cd`s into the folder and opens the `claude` chat there; the whole
 value is removing the "open an IDE and type a command" friction.
 
-This skill ships two ready launchers in **[assets/](assets/)**:
+This skill ships two ready launchers in **[assets/](assets/)** — one per OS:
 
-- **`assets/Talk to my files.bat`** — Windows (the majority audience). Double-click in File Explorer.
+- **`assets/Talk to my files.bat`** — Windows. Double-click in File Explorer.
 - **`assets/Talk to my files.command`** — macOS. Double-click in Finder.
 
-**Both let the user pick the assistant at the start.** If both `claude` (Claude Code) and `codex` (Codex) are
-installed, the launcher shows a one-key menu — `[1] Claude Code  [2] Codex` — and opens the chosen one. If only
-one is installed, it opens that one directly (no menu). The `.bat` also falls back to `wsl claude`.
+**Each always shows the same one-key picker at the start**, marking what's installed:
+
+```
+Which assistant do you want to use?
+[1] Claude Code   ✓ installed
+[2] Codex         — not installed, I'll help you set it up
+```
+
+Pick an **installed** one → it opens the chat in the folder. Pick a **not-installed** one → it prints a short
+note and **opens that assistant's official setup page in the browser** (no dead-end error). The `.bat` also
+falls back to `wsl claude` if Claude Code is picked but only present inside WSL.
 
 ## How to deploy (loop step 6)
 
-1. **Copy both into the mother (root) folder only.** They open `claude` at the top of the tree, which
-   auto-loads every router down the chain. Don't scatter one per subfolder.
-   - A folder synced by Drive/SharePoint can be opened on either OS, so dropping **both** is the safe default.
-     If you know the audience is Windows-only (or Mac-only), you may drop just the one.
+1. **Detect the OS you're running on and copy ONLY the matching launcher** into the mother (root) folder — the
+   `.command` on macOS, the `.bat` on Windows. **One file, so a non-technical person can't click the wrong
+   one.** (Native Windows has no `bash`; a `.command` there just opens a text editor, and vice-versa.)
+   - **Exception:** if the user says the folder is **shared across Mac and Windows** (e.g. a synced
+     Drive/SharePoint folder opened on both), drop **both**.
+   - Put it at the **root only** — it opens the assistant at the top of the tree, which auto-loads every router
+     down the chain. Don't scatter one per subfolder.
 2. **The banner is English.** If you want it in another language for the person clicking, edit the
    `echo` / `printf` lines to match — the banner is for the person clicking, not the project content.
 3. **Rename to taste.** Keep it obvious and inviting: "Talk to my files", "Ask this folder",
@@ -28,14 +39,15 @@ one is installed, it opens that one directly (no menu). The `.bat` also falls ba
    `xattr -d com.apple.quarantine "<root>/Talk to my files.command" 2>/dev/null || true`.
 5. **Tell the user in one plain sentence** how to open it, and warn about the first-run OS prompt (below).
 
-## What the banner does (both files)
+## What the launcher does (both files)
 
 - `clear` / `cls` the screen so no scary shell text shows.
 - Print a warm English greeting + two or three example questions.
-- **Detect which assistants are installed** (`claude`, `codex`): if both, show a one-key `[1]/[2]` menu; if
-  one, open it directly; if neither, print a **gentle install message** with both links instead of a technical
-  error (the `.bat` also tries `wsl claude` first).
-- Open the chosen assistant in the folder, then print a friendly goodbye when the chat ends.
+- **Detect which assistants are installed** (`claude`, `codex`) and **always show the `[1]/[2]` picker**,
+  labelling each as installed or not.
+- On a pick: open the chosen assistant in the folder if installed; otherwise open its official setup page in
+  the browser (`open` on macOS, `start` on Windows) and pause with a friendly note.
+- Print a friendly goodbye when the chat ends.
 
 Keep the banner short and human. The tone of the **chat itself** is set separately by the
 `## How to talk to the user` block in the root `AGENTS.md` (see [shape-basic.md](shape-basic.md)).

@@ -168,8 +168,8 @@ but it can feel like a developer tool. Three levers, all set at build time, make
 assistant** instead. Set them so a non-technical person is never scared or confused:
 
 1. **The welcome banner** (in the launcher) — a warm, plain-language English greeting with two or three example
-   questions, and a one-key pick between Claude Code and Codex when both are installed. See
-   [LAUNCHER.md](LAUNCHER.md).
+   questions, then a one-key pick between Claude Code and Codex (always shown, labelled by what's installed; an
+   un-installed pick opens its setup page instead of erroring). See [LAUNCHER.md](LAUNCHER.md).
 2. **A tone block in the root `AGENTS.md`** — so the assistant **replies in the user's language, in plain
    words (no jargon), stays concise, and asks a friendly confirmation before anything destructive** (deleting,
    overwriting, sending). The copy-paste `## How to talk to the user` block is in

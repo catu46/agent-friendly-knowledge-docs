@@ -26,9 +26,6 @@ echo    - "what's in this folder?"
 echo    - "summarize the proposal for client X"
 echo    - "which is the latest version of the model?"
 echo(
-echo    Just type below and press Enter.
-echo    (To leave when you're done, type /exit and Enter.)
-echo(
 echo    --------------------------------------------------
 echo(
 
@@ -38,35 +35,47 @@ where claude >nul 2>nul && set HAVE_CLAUDE=1
 set HAVE_CODEX=0
 where codex >nul 2>nul && set HAVE_CODEX=1
 
-REM Both installed -> let the user pick at the start.
-if "%HAVE_CLAUDE%%HAVE_CODEX%"=="11" (
-  echo    Which assistant do you want to use?
-  echo(
-  choice /c 12 /n /m "   [1] Claude Code   [2] Codex   -- type 1 or 2: "
-  if errorlevel 2 ( codex & goto despedida )
-  claude & goto despedida
-)
+set "S1=not installed - I'll help you set it up"
+if "%HAVE_CLAUDE%"=="1" set "S1=installed"
+set "S2=not installed - I'll help you set it up"
+if "%HAVE_CODEX%"=="1" set "S2=installed"
 
-if "%HAVE_CLAUDE%"=="1" ( claude & goto despedida )
-if "%HAVE_CODEX%"=="1" ( codex & goto despedida )
-
-REM None found natively: try Claude Code inside WSL, else a gentle message.
-where wsl >nul 2>nul
-if %errorlevel%==0 (
-  wsl claude & goto despedida
-)
-
-echo    Almost there! You just need to install an assistant once.
-echo    Ask for help installing one of these:
-echo    - Claude Code - https://claude.com/claude-code
-echo    - Codex       - https://developers.openai.com/codex
+REM Always show the picker, marking what's installed.
+echo    Which assistant do you want to use?
 echo(
+echo    [1] Claude Code   %S1%
+echo    [2] Codex         %S2%
+echo(
+choice /c 12 /n /m "   Type 1 or 2: "
+if errorlevel 2 goto pick_codex
+goto pick_claude
+
+:pick_claude
+if "%HAVE_CLAUDE%"=="1" ( claude & goto done )
+where wsl >nul 2>nul && ( wsl claude & goto done )
+set "GNAME=Claude Code"
+set "GURL=https://claude.com/claude-code"
+goto guide
+
+:pick_codex
+if "%HAVE_CODEX%"=="1" ( codex & goto done )
+set "GNAME=Codex"
+set "GURL=https://developers.openai.com/codex"
+goto guide
+
+:guide
+echo(
+echo    %GNAME% isn't installed yet. Opening the setup guide in your browser...
+echo    %GURL%
+start "" "%GURL%"
+echo(
+echo    First-time setup is easiest with a technical colleague.
 echo    Once it's installed, just double-click here again.
 echo(
 pause
 exit /b 0
 
-:despedida
+:done
 echo(
-echo    All done! You can close this window. See you next time 👋
+echo    All done! You can close this window. See you next time.
 echo(
