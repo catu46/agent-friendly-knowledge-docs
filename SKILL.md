@@ -176,6 +176,13 @@ reading reveals WHAT IS; the human reveals WHAT MATTERS and WHAT'S STILL TRUE.
    **Done when** the root `AGENTS.md` carries the catch-up block and `.okf-state.json` exists. *(A scheduled,
    fully-unattended watcher is **v2 / optional**, [WATCHER.md](WATCHER.md) — it has real limits on a laptop and
    is NOT the default.)*
+9. **Arm the strong gate — force the catch-up so the docs can't silently rot.** The catch-up protocol is soft
+   (the agent can forget it when context is tight). Back it with a deterministic gate: drop the Claude Code
+   `SessionStart` + `Stop` hooks (they run `snapshot.py check` and **block the agent from finishing** while any
+   folder is stale) and wire the launcher to run the same check (which also covers Codex). Full deploy +
+   copy-paste: **[FORCING.md](FORCING.md).** **Confirm before writing `.claude/settings.json`** (it changes how
+   Claude Code behaves in the folder). **Done when** `snapshot.py check <root>` is wired into both the hooks and
+   the launcher.
 
 **At scale (hundreds of folders), DECENTRALIZE:** one subagent per leaf folder writes that folder's docs; roll
 summaries leaf → mid → root so no context ever holds the whole tree.

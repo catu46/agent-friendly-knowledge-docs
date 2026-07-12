@@ -113,6 +113,29 @@ docs with the real files before doing anything else that depends on them:
 
 ---
 
+## 1c. Router-only folders (a "mother" that holds ONLY subfolders)
+
+A folder that holds **no artifacts of its own — only topic subfolders** (e.g. a root over `Decks/`, `Model/`,
+`Reports/`) is NOT a "meaningful folder": it gets **only `CLAUDE.md` + `AGENTS.md`**, and **no `index.md` /
+`log.md` / `.okf-state.json`.** Its `AGENTS.md` `## Knowledge` section points **DOWN at the subfolders**, not at
+a local `index.md` that wouldn't exist (that would leave a dangling link and fail `validate.py`). Use this
+`## Knowledge` in place of the one in §1:
+
+~~~md
+## Knowledge
+This folder routes to topic subfolders, each self-contained:
+- [`Decks/`](./Decks/) — <one line>
+- [`Model/`](./Model/) — <one line>
+- [`Reports/`](./Reports/) — <one line>
+~~~
+
+If the root is a router-only folder, it still carries the root-only blocks from §1b (top-of-tree, tone,
+catch-up). Everything else — the five files — lives in the meaningful subfolders below. (If a folder holds
+BOTH its own artifacts AND subfolders, it's meaningful: give it the full five files, and list the subfolders as
+extra links under `## Knowledge`.)
+
+---
+
 ## 2. `CLAUDE.md` stub (root and every folder — identical)
 
 ~~~md

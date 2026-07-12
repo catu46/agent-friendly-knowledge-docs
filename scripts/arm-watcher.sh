@@ -53,7 +53,7 @@ RUNNER="$RUNNER_BIN$RUNNER_ARGS"
 mkdir -p "$TARGET/.okf"
 cp "$HERE/watcher-prompt.txt" "$TARGET/.okf/watcher-prompt.txt"
 COPIED_SCRIPTS=""
-for s in artifact-diff.py validate.py graph.py; do
+for s in artifact-diff.py validate.py snapshot.py; do
   if [ -f "$HERE/$s" ]; then
     cp "$HERE/$s" "$TARGET/.okf/$s"
     COPIED_SCRIPTS="$COPIED_SCRIPTS $s"

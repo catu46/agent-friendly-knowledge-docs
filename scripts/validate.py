@@ -372,6 +372,13 @@ def check_md(path, root):
         for heading in ("## Rules", "## Knowledge", "## Keep this current"):
             if heading not in body:
                 warn(path, 'AGENTS.md is missing the "%s" section' % heading)
+        # CHECK: the ROOT AGENTS.md must carry the two mandatory root-only blocks
+        # (the tone block and the self-maintenance protocol). Without them the tree
+        # doesn't meet SKILL.md's own "Done when" — so it's an ERROR, not a WARN.
+        if not parent_agents_exists(base_dir, root):
+            for heading in ("## How to talk to the user", "## Catch up on changes"):
+                if heading not in body:
+                    err(path, 'root AGENTS.md is missing the required "%s" block' % heading)
 
 
 # --------------------------------------------------------------------------- #

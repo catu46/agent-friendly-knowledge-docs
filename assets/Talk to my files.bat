@@ -29,6 +29,17 @@ echo(
 echo    --------------------------------------------------
 echo(
 
+REM Forcing gate (works for Claude Code AND Codex): if the files changed since the
+REM docs were last updated, nudge the user to catch up first.
+if exist ".claude\hooks\snapshot.py" (
+  python ".claude\hooks\snapshot.py" check . >nul 2>nul
+  if errorlevel 3 (
+    echo    [!] Some files changed since last time.
+    echo        Before anything else, ask me: "what changed?" -- I'll update the notes.
+    echo(
+  )
+)
+
 REM Which assistants are installed?
 set HAVE_CLAUDE=0
 where claude >nul 2>nul && set HAVE_CLAUDE=1

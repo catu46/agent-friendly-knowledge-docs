@@ -1,0 +1,49 @@
+# Forcing updates — the strong gate
+
+A dumb script cannot **write** the doc updates (summarizing "the model changed, revenue is now X because Y"
+needs the assistant's judgment). But it **can force the update to happen**, deterministically, outside the chat
+— so the docs can't silently rot even when the assistant forgets due to a full context window.
+
+The gate has three enforcement points, all built on **one deterministic check**:
+`python3 <hooks>/snapshot.py check <root>` → exits **3** if any folder's files changed since the docs were last
+reconciled, **0** if in sync.
+
+## 1. Claude Code hooks (block the chat) — the primary force
+
+The skill drops, into the mother folder:
+
+```
+<root>/.claude/
+├── settings.json          # merged from hooks/settings.json.template
+└── hooks/
+    ├── okf-stale-hook.sh   # from this skill's hooks/
+    └── snapshot.py         # copied so the hook is self-contained
+```
+
+- **`SessionStart` hook** → on opening the folder, if stale, injects *"catch up first"* + the change list into
+  the agent's context, so the reconcile happens before anything else.
+- **`Stop` hook** → when the agent tries to finish, if stale, **blocks it** (exit 2) and feeds back *"update the
+  docs first"*. The agent literally cannot end the turn without reconciling. A loop-guard (`stop_hook_active`)
+  means it blocks once, not forever.
+
+Deploy (loop step 9): create `<root>/.claude/hooks/`, copy `okf-stale-hook.sh` + `scripts/snapshot.py` there
+(`chmod +x` the hook), and merge `hooks/settings.json.template` into `<root>/.claude/settings.json` (create it
+if absent; if it exists, merge the `hooks` keys, don't clobber). **Confirm before writing settings.json** — it
+changes how Claude Code behaves in that folder.
+
+## 2. The launcher check (covers Codex too)
+
+Hooks are a **Claude Code** feature — they don't fire under Codex. So the launcher also runs the same check on
+open: if stale, it prints a visible banner (*"⚠️ Files changed since last time — ask me 'what changed?' first"*)
+before handing off to the chat. Belt and suspenders for whichever assistant the user picked.
+
+## 3. Honest limits
+
+- The gate **detects and blocks**; the assistant still does the actual reconcile. That's the correct division —
+  detection is deterministic, summarization is judgment.
+- Hooks bind to **this folder** (project-level `.claude/settings.json`); they don't affect the user's other
+  work.
+- Under **Codex**, only the launcher banner fires (no Stop-block). That's the honest ceiling of a non-Claude
+  assistant.
+- The check compares file **bytes** (sha256) against the snapshot, so it catches changed numbers in a re-saved
+  spreadsheet — not just new/deleted files.

@@ -14,6 +14,9 @@ Usage:
   python3 snapshot.py write <folder>     # write/refresh <folder>/.okf-state.json
   python3 snapshot.py diff  <folder>     # print what changed vs the saved snapshot
   python3 snapshot.py diff  <folder> --json   # same, machine-readable
+  python3 snapshot.py check <root>       # walk the TREE; exit 3 if any folder is
+                                         #   stale (docs behind the files), else 0.
+                                         #   The deterministic gate hooks call.
 
 `diff` reports added / modified / deleted, and detects a rename/move within the
 folder (a deleted file and an added file with the SAME sha256 = a rename, not a
@@ -42,14 +45,26 @@ LAUNCHER_PREFIX = "Talk to my files"
 
 
 def load_okfignore(folder):
+    """Patterns from `.okfignore` in this folder AND every ancestor up to the
+    filesystem root, so a single `.okfignore` at the tree root covers the whole
+    subtree — matching validate.py's root-scoped behavior. (Fixes the old
+    per-folder-only mismatch: a root ignore now reaches subfolders.)"""
     globs = []
-    path = os.path.join(folder, ".okfignore")
-    if os.path.isfile(path):
-        with open(path, "r", encoding="utf-8", errors="replace") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#"):
-                    globs.append(line)
+    seen = set()
+    d = os.path.abspath(folder)
+    while True:
+        path = os.path.join(d, ".okfignore")
+        if path not in seen and os.path.isfile(path):
+            seen.add(path)
+            with open(path, "r", encoding="utf-8", errors="replace") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        globs.append(line)
+        parent = os.path.dirname(d)
+        if parent == d:
+            break
+        d = parent
     return globs
 
 
@@ -182,8 +197,43 @@ def _emit_diff(folder, result, as_json, no_snapshot=False):
         print("  deleted:  %s" % f)
 
 
+def cmd_check(root):
+    """Walk the tree; for every folder that has a snapshot, diff it. Print all
+    stale folders and exit 3 if ANY are stale, 0 if all in sync. This is the
+    deterministic 'are the docs behind the files?' gate the hooks and launcher
+    call — no LLM needed to DETECT drift (only to fix it)."""
+    stale = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if not d.startswith(".") and d != "_archive"]
+        if ".okf-state.json" not in filenames:
+            continue
+        old = load_snapshot(dirpath) or {}
+        cur = scan(dirpath, load_okfignore(dirpath))
+        added = [n for n in cur if n not in old]
+        deleted = [n for n in old if n not in cur]
+        modified = [n for n in cur if n in old and cur[n]["sha256"] != old[n]["sha256"]
+                    and cur[n]["sha256"] != "unreadable" and old[n]["sha256"] != "unreadable"]
+        if added or deleted or modified:
+            stale.append((os.path.relpath(dirpath, root), added, modified, deleted))
+    if not stale:
+        print("Docs are in sync with the files. Nothing to reconcile.")
+        return 0
+    print("STALE — these folders have file changes not yet reflected in the docs:")
+    for rel, a, m, d in stale:
+        print("  %s/" % ("." if rel == "." else rel))
+        for n in a:
+            print("    added:    %s" % n)
+        for n in m:
+            print("    modified: %s" % n)
+        for n in d:
+            print("    deleted:  %s" % n)
+    print("\nReconcile: ask the assistant \"what changed?\" — it updates index.md/log.md,")
+    print("then refreshes the snapshot (snapshot.py write) which clears this.")
+    return 3
+
+
 def main(argv):
-    if len(argv) < 3 or argv[1] not in ("write", "diff"):
+    if len(argv) < 3 or argv[1] not in ("write", "diff", "check"):
         sys.stderr.write(__doc__)
         return 2
     cmd, folder = argv[1], argv[2]
@@ -193,8 +243,10 @@ def main(argv):
         return 2
     if cmd == "write":
         cmd_write(folder)
-    else:
-        cmd_diff(folder, as_json)
+        return 0
+    if cmd == "check":
+        return cmd_check(folder)
+    cmd_diff(folder, as_json)
     return 0
 
 

@@ -33,6 +33,16 @@ printf '\n'
 printf '   %s────────────────────────────────────────────%s\n' "$DIM" "$R"
 printf '\n'
 
+# Forcing gate (works for Claude Code AND Codex): if the files changed since the
+# docs were last updated, nudge the user to catch up first.
+if [ -f ".claude/hooks/snapshot.py" ]; then
+  python3 ".claude/hooks/snapshot.py" check . >/dev/null 2>&1
+  if [ "$?" -eq 3 ]; then
+    printf '   %s⚠  Some files changed since last time.%s\n' "$B" "$R"
+    printf "   %sBefore anything else, ask me: \"what changed?\" — I'll update the notes.%s\n\n" "$DIM" "$R"
+  fi
+fi
+
 have() { command -v "$1" >/dev/null 2>&1; }
 have_claude=0; have claude && have_claude=1
 have_codex=0;  have codex  && have_codex=1
