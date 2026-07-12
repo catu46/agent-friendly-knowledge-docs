@@ -32,9 +32,10 @@ else SKILL_ROOT=""; fi
 
 if [ -n "$SKILL_ROOT" ]; then
   # Running from inside the skill repo → link this copy.
+  # ln -sfn (re)creates the link even if a previous one went dangling after a move.
   for base in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
     mkdir -p "$base"
-    [ -e "$base/$SKILL_NAME" ] || ln -s "$SKILL_ROOT" "$base/$SKILL_NAME" 2>/dev/null
+    ln -sfn "$SKILL_ROOT" "$base/$SKILL_NAME" 2>/dev/null
   done
 else
   # Handed as a standalone file → download the skill once from GitHub.
@@ -52,7 +53,7 @@ else
     fi
   fi
   mkdir -p "$HOME/.claude/skills"
-  [ -e "$HOME/.claude/skills/$SKILL_NAME" ] || ln -s "$SKILL_HOME" "$HOME/.claude/skills/$SKILL_NAME"
+  ln -sfn "$SKILL_HOME" "$HOME/.claude/skills/$SKILL_NAME" 2>/dev/null
 fi
 
 # 1b) Python powers the automatic "what changed" tracking + checks. Offer to install

@@ -18,7 +18,7 @@ neither shape is treated as a pure router (allowed for mother/intermediate
 folders) and only WARNs.
 
 Run it on a GENERATED documentation tree, not on the skill's own source
-(whose shape-pro-max.md / shape-basic.md deliberately contain example links
+(whose shape-basic.md deliberately contains example links
 inside code fences that do not resolve; those fences are skipped, but other
 repo docs may not be).
 

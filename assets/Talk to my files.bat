@@ -31,10 +31,10 @@ echo(
 
 REM Python powers the "what changed" check below. Offer to install it if missing;
 REM whatever happens, continue to the chat.
-set HAVE_PY=0
-where python  >nul 2>nul && set HAVE_PY=1
-where python3 >nul 2>nul && set HAVE_PY=1
-if "%HAVE_PY%"=="1" goto tpy_ok
+set "PY_CMD="
+where python  >nul 2>nul && set "PY_CMD=python"
+if not defined PY_CMD ( where python3 >nul 2>nul && set "PY_CMD=python3" )
+if defined PY_CMD goto tpy_ok
 echo    Python isn't installed -- it powers the automatic change-tracking.
 choice /c yn /n /m "   Install it now? [y] yes / [n] skip: "
 if errorlevel 2 goto tpy_skip
@@ -47,7 +47,9 @@ if errorlevel 1 (
 echo    Installing Python via winget...
 winget install -e --id Python.Python.3.13 --accept-source-agreements --accept-package-agreements
 if errorlevel 1 ( start "" "https://www.python.org/downloads/" & goto tpy_ok )
-for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')"`) do set "PATH=%%P"
+for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')"`) do set "PATH=%PATH%;%%P"
+where python  >nul 2>nul && set "PY_CMD=python"
+if not defined PY_CMD ( where python3 >nul 2>nul && set "PY_CMD=python3" )
 echo    Done.
 goto tpy_ok
 :tpy_skip
@@ -57,8 +59,8 @@ echo(
 
 REM Forcing gate (works for Claude Code AND Codex): if the files changed since the
 REM docs were last updated, nudge the user to catch up first.
-if exist ".claude\hooks\snapshot.py" (
-  python ".claude\hooks\snapshot.py" check . >nul 2>nul
+if defined PY_CMD if exist ".claude\hooks\snapshot.py" (
+  %PY_CMD% ".claude\hooks\snapshot.py" check . >nul 2>nul
   if errorlevel 3 (
     echo    [!] Some files changed since last time.
     echo        Before anything else, ask me: "what changed?" -- I'll update the notes.
@@ -88,7 +90,7 @@ if errorlevel 2 goto sel_codex
 
 :sel_claude
 if "%HAVE_CLAUDE%"=="1" ( claude & goto done )
-where wsl >nul 2>nul && ( wsl claude & goto done )
+where wsl >nul 2>nul && wsl -e sh -lc "command -v claude >/dev/null 2>&1" && ( wsl claude & goto done )
 set "DOCS=https://code.claude.com/docs/en/quickstart"
 echo(
 echo    Claude Code isn't installed yet. I can set it up for you.

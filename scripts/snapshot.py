@@ -38,8 +38,11 @@ import hashlib
 import fnmatch
 import datetime
 
+# The skill's own shape files — never tracked as artifacts. NOTE: README.md is NOT
+# here: in a user's document folder a README.md is a real deliverable and must be
+# tracked. (Exclude the skill repo's own README via .okfignore if you ever scan it.)
 DOC_FILES = {
-    "AGENTS.md", "CLAUDE.md", "index.md", "log.md", "README.md",
+    "AGENTS.md", "CLAUDE.md", "index.md", "log.md",
     ".okf-state.json", ".okfignore", "ASKS.md", "LAST-CHECK.md",
 }
 LAUNCHER_PREFIX = "Talk to my files"
@@ -122,6 +125,12 @@ def now_iso():
 def cmd_write(folder):
     ignore_globs = load_okfignore(folder)
     files = scan(folder, ignore_globs)
+    if not files:
+        # A router-only folder (only subfolders, no artifacts of its own) gets no
+        # .okf-state.json — so the catch-up block's "snapshot.py write ." is a no-op
+        # here rather than a contradiction with the "no .okf-state.json" rule.
+        print("no artifacts in %s — no snapshot needed (router-only folder)" % folder)
+        return
     snap = {"generated": now_iso(), "files": list(files.values())}
     out = os.path.join(folder, ".okf-state.json")
     with open(out, "w", encoding="utf-8") as f:

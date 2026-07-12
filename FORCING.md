@@ -52,7 +52,10 @@ before handing off to the chat. Belt and suspenders for whichever assistant the 
   what it is** before documenting it — it must not invent an `index.md` for a folder it doesn't understand.
   Being asked "what is this folder?" is the system working, not a bug.
 - Hooks bind to **this folder** (project-level `.claude/settings.json`); they don't affect the user's other
-  work.
+  work. **They apply when the session's project root is this folder** — i.e. when the user opens the tree via
+  the root launcher (or `claude`/`codex` at the root). If someone opens `claude` *directly inside a subfolder*,
+  the root `.claude/settings.json` may not be in scope, so drop the hooks at the root the user actually opens
+  (the launcher lives at the root for exactly this reason), and rely on the launcher's own check for Codex.
 - Under **Codex**, only the launcher banner fires (no Stop-block). That's the honest ceiling of a non-Claude
   assistant.
 - The check compares file **bytes** (sha256) against the snapshot, so it catches changed numbers in a re-saved

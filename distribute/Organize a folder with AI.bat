@@ -34,7 +34,7 @@ if defined SKILL_ROOT (
   REM Running from inside the skill repo -> junction this copy (no admin needed).
   for %%B in ("%USERPROFILE%\.claude\skills" "%USERPROFILE%\.agents\skills") do (
     if not exist "%%~B" mkdir "%%~B"
-    if not exist "%%~B\%SKILL_NAME%" mklink /J "%%~B\%SKILL_NAME%" "%SKILL_ROOT%" >nul 2>nul
+    if not exist "%%~B\%SKILL_NAME%\SKILL.md" ( rmdir "%%~B\%SKILL_NAME%" >nul 2>nul & mklink /J "%%~B\%SKILL_NAME%" "%SKILL_ROOT%" >nul 2>nul )
   )
 ) else (
   REM Handed as a standalone file -> download the skill once from GitHub.
@@ -48,7 +48,7 @@ if defined SKILL_ROOT (
     del "%TEMP%\%SKILL_NAME%.tgz" >nul 2>nul
   )
   if not exist "%USERPROFILE%\.claude\skills" mkdir "%USERPROFILE%\.claude\skills"
-  if not exist "%USERPROFILE%\.claude\skills\%SKILL_NAME%" mklink /J "%USERPROFILE%\.claude\skills\%SKILL_NAME%" "%SKILL_HOME%" >nul 2>nul
+  if not exist "%USERPROFILE%\.claude\skills\%SKILL_NAME%\SKILL.md" ( rmdir "%USERPROFILE%\.claude\skills\%SKILL_NAME%" >nul 2>nul & mklink /J "%USERPROFILE%\.claude\skills\%SKILL_NAME%" "%SKILL_HOME%" >nul 2>nul )
 )
 echo(
 
@@ -79,7 +79,7 @@ if errorlevel 1 (
   exit /b 0
 )
 REM Refresh PATH from the registry (winget wrote Python there) so THIS window sees it.
-for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')"`) do set "PATH=%%P"
+for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')"`) do set "PATH=%PATH%;%%P"
 where python >nul 2>nul || where python3 >nul 2>nul
 if errorlevel 1 (
   echo    Python installed -- please close this window and double-click again.
