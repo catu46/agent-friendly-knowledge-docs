@@ -19,10 +19,11 @@ folder/
 - **`log.md` = memory** — every real change appends one dated line (what + why + who). Append-only, so "what
   we used to do" is never overwritten.
 
-Write everything in **English** (this skill authors all files in English; only the *live chat* mirrors the
-user's language). Replace every `<placeholder>`. Timestamps are ISO-8601 UTC. The `## If you opened only this
-folder` and `## Keep this current` sections are **mandatory** in every `AGENTS.md`. Outer fences are `~~~` so
-nested ``` blocks render.
+Write the generated docs — `index.md`, `log.md`, and the human-readable **Rules** in `AGENTS.md` — in the
+**content/project language** (the language of the material and the user). This *reference* file, and the fixed
+agent-protocol blocks below (tone, catch-up), stay English. Replace every `<placeholder>`. Timestamps are
+ISO-8601 UTC. The `## If you opened only this folder` and `## Keep this current` sections are **mandatory** in
+every `AGENTS.md`. Outer fences are `~~~` so nested ``` blocks render.
 
 ---
 
@@ -214,11 +215,12 @@ router down the chain.
 
 ## When a folder outgrows this skill
 
-Move a specific folder to the heavier sibling skill **`agent-friendly-docs`** (OKF concept bundle + graph) when
-it has:
+Move a specific folder to the heavier sibling skill **`agent-friendly-docs`** (OKF concept bundle + graph) only
+when it's genuinely **complex and dense** — several of these at once:
 
-- **versioned artifacts with real history** worth linkable, superseded nodes (v6→v7→v8 + the "why");
+- **many versioned artifacts with real history** worth linkable, superseded nodes (v6→v7→v8 + the "why");
 - **knowledge reused across many folders** (one canonical definition linked everywhere, not copy-pasted);
-- **files that RUN and depend on each other** (code, SQL, operational models).
+- **a web of files that RUN and depend on each other** — the construction itself is the deliverable.
 
-Otherwise this flat shape is the right, simpler default — clarity over machinery.
+A folder that merely *contains* a few SQL queries or a script but stays readable and independent is **not** that
+— keep the flat shape. Clarity over machinery; escalate only when the density demands it.

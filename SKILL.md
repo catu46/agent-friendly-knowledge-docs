@@ -1,6 +1,6 @@
 ---
 name: agent-friendly-knowledge-docs
-description: Make a folder tree of DOCUMENTS agent-navigable and self-maintaining — decks, spreadsheets, PDFs, proposals, notes filed by topic on a computer, Drive, or SharePoint. For non-engineers (consultants, managers, analysts) who edit files outside any IDE. Scaffolds a thin AGENTS.md router + CLAUDE.md stub + a readable index.md + append-only log.md per folder, drops a one-click "talk to my files" launcher in the top folder, proves it with a fresh-eyes test, and keeps the docs current by CATCHING UP ON WHAT CHANGED whenever the user opens the folder — a new deck, an Excel re-saved with new numbers, a Drive/SharePoint rename — driven by a persistent per-folder snapshot, with NO background job (an unattended scheduled watcher is optional/v2). Deliberately simple — one index per folder, no knowledge-graph, no versioned concept bundles, no mode question; folders of CODE/SQL/operational models that RUN belong to the sibling skill agent-friendly-docs. Triggers: "organize my documents/folders for AI", "make my folders agent-friendly", "index.md per folder", "mother CLAUDE.md", "talk to my files launcher", "what changed while I was away", "keep my docs updated", "AGENTS.md for documents", "Drive/SharePoint docs for AI".
+description: Make a folder tree of DOCUMENTS agent-navigable and self-maintaining — decks, spreadsheets, PDFs, proposals, notes filed by topic on a computer, Drive, or SharePoint. For non-engineers (consultants, managers, analysts) who edit files outside any IDE. Scaffolds a thin AGENTS.md router + CLAUDE.md stub + a readable index.md + append-only log.md per folder, drops a one-click "talk to my files" launcher in the top folder, proves it with a fresh-eyes test, and keeps the docs current by CATCHING UP ON WHAT CHANGED whenever the user opens the folder — a new deck, an Excel re-saved with new numbers, a Drive/SharePoint rename — driven by a persistent per-folder snapshot, with NO background job (an unattended scheduled watcher is optional/v2). Deliberately simple — one index per folder, no knowledge-graph, no versioned concept bundles, no mode question. Best for knowledge-work folders that AREN'T extremely complex or dense; a few useful SQL queries or scripts sitting alongside the decks are perfectly fine here — only a genuinely dense, interdependent web of versioned artifacts that RUN and depend on each other belongs to the heavier sibling skill agent-friendly-docs. Triggers: "organize my documents/folders for AI", "make my folders agent-friendly", "index.md per folder", "mother CLAUDE.md", "talk to my files launcher", "what changed while I was away", "keep my docs updated", "AGENTS.md for documents", "Drive/SharePoint docs for AI".
 ---
 
 # Agent-Friendly Knowledge Docs
@@ -27,14 +27,21 @@ North-star loop: walk into a folder, ask a question, the agent **reads the files
 **This skill is `basic` by design — no tiers, no question.** One readable `index.md` per folder + an
 append-only `log.md`. **No** `knowledge/` bundle, **no** concept files, **no** `status`/`supersede`
 frontmatter, **no** knowledge-graph — that machinery is the heavier sibling skill **`agent-friendly-docs`**,
-for folders of CODE / SQL / operational models that **RUN** and depend on each other. When to reach for it:
-see [When a folder outgrows this skill](#when-a-folder-outgrows-this-skill).
+for **extremely complex, dense folders**: a large interdependent web of versioned artifacts that **RUN** and
+depend on each other. Note the line is **density/complexity, not file type** — a knowledge-work folder that
+happens to include a few handy SQL queries, scripts, or a small model stays right here; it doesn't become
+"engineering" just for containing them. When to reach for the sibling: see
+[When a folder outgrows this skill](#when-a-folder-outgrows-this-skill).
 
-**Language — English by default, everywhere authored.** Skill instructions, the launcher banner, and the docs
-you generate (`index.md`, `log.md`, `AGENTS.md`) are all **English** — one consistent language, never mixed.
-The only place language adapts is the **live conversation**: reply in whatever language the user writes to you
-in (that's the `## How to talk to the user` tone block). So a Portuguese-speaking consultant still gets
-Portuguese answers, while every file on disk stays English.
+**Language — two layers.** This skill's OWN files (this SKILL.md, the shape/launcher/watcher references, the
+scripts) stay in **English** — the model executes them whatever the chat language. But everything the skill
+**writes into the user's folders** — `index.md`, `log.md`, and the human-readable **Rules** in `AGENTS.md` — is
+authored in the **content/project language**: the language of the documents being organized and of the user
+(detect it from evidence; don't assume). The **live chat** always mirrors the user's language (the
+`## How to talk to the user` block). So a Portuguese consultant with Portuguese material gets Portuguese chat
+*and* a Portuguese `index.md`/`log.md`, while this skill's own instructions stay English under the hood. (The
+fixed agent-protocol blocks in `AGENTS.md` — tone, catch-up — and the launcher banner ship in English;
+translate them if you like.)
 
 ---
 
@@ -248,14 +255,16 @@ nothing). Full spec + honest limits: **[WATCHER.md](WATCHER.md).**
 ## When a folder outgrows this skill
 
 `basic` is the right, simpler default. Move a specific folder to the heavier sibling skill
-**`agent-friendly-docs`** (OKF concept bundle + knowledge-graph) only when it has:
+**`agent-friendly-docs`** (OKF concept bundle + knowledge-graph) only when it's genuinely **complex and dense**
+— several of these at once, not just one:
 
-- **versioned artifacts with real history** worth linkable, superseded nodes (v6→v7→v8 + the "why");
+- **many versioned artifacts with real history** worth linkable, superseded nodes (v6→v7→v8 + the "why");
 - **knowledge reused across many folders** (one canonical definition linked everywhere, not copy-pasted);
-- **files that RUN and depend on each other** (code, SQL, operational models) — where the exact file, its
-  structure and dependencies, is what matters.
+- **a web of files that RUN and depend on each other** — where the exact file, its structure and dependencies,
+  is the deliverable, and a knowledge-graph earns its keep.
 
-Otherwise stay here: clarity over machinery.
+A folder that just *contains* some SQL or a script, but stays readable and mostly independent, is **not** that —
+keep it here. Clarity over machinery; escalate only when the density actually demands it.
 
 ---
 

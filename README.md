@@ -3,15 +3,17 @@
 **Turn a folder of documents into something an AI can navigate — and that keeps itself organized.**
 
 For the **knowledge worker**, not the engineer. If your work lives in slide decks, spreadsheets, PDFs,
-proposals, and notes — filed by topic on your computer, Google Drive, or SharePoint — this skill makes that
-folder tree *agent-navigable*: any AI assistant can walk in, read the files, and actually help, and the
-documentation **keeps itself current** as you add and change files.
+proposals, and notes — plus the odd useful SQL query or script — filed by topic on your computer, Google Drive,
+or SharePoint, this skill makes that folder tree *agent-navigable*: any AI assistant can walk in, read the
+files, and actually help, and the documentation **keeps itself current** as you add and change files.
 
-It's deliberately **simple**. One readable index per folder. No knowledge-graphs, no versioned concept
-bundles, no "which mode do you want?" question. If your folder is full of **code, SQL, or operational models
-that run and depend on each other**, use the heavier sibling skill
-[`agent-friendly-docs`](https://github.com/catu46/agent-friendly-docs) instead — this one is for the filing
-cabinet, not the machine.
+It's deliberately **simple**, and it's for folders that **aren't extremely complex or dense**. One readable
+index per folder. No knowledge-graphs, no versioned concept bundles, no "which mode do you want?" question. A
+handful of SQL queries or scripts sitting alongside your decks is perfectly fine here — the line is
+*density*, not file type. Only a **large, dense, interdependent system** whose files run and depend on each
+other belongs to the heavier sibling skill
+[`agent-friendly-docs`](https://github.com/catu46/agent-friendly-docs) — this one is for the filing cabinet,
+not the machine room.
 
 ## What you get
 
