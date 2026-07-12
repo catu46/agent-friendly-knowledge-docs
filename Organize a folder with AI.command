@@ -59,17 +59,21 @@ if ! command -v python3 >/dev/null 2>&1; then
   printf '\n'
   case "$pyans" in
     y|Y|s|S|yes|sim)
-      # xcode-select --install pops the native GUI installer and provides python3.
-      if xcode-select --install 2>/dev/null; then
-        printf '   %sClick "Install" in the window that just popped up and let it finish%s\n' "$DIM" "$R"
-        printf '   %s(a few minutes). Then double-click this app again.%s\n\n' "$DIM" "$R"
-      else
-        # Tools already present but no python3, or the trigger failed → use python.org.
-        printf '   %sOpening the Python download page instead…%s\n\n' "$DIM" "$R"
-        open "https://www.python.org/downloads/" >/dev/null 2>&1
-      fi
-      printf '   %s(You can close this window.)%s\n\n' "$DIM" "$R"
-      exit 0
+      # xcode-select --install pops the native GUI installer (Command Line Tools
+      # include python3). Then wait for it to finish and continue automatically.
+      printf '   %sOpening the macOS installer for Python…%s click "Install" and let it run.\n' "$DIM" "$R"
+      xcode-select --install 2>/dev/null || true
+      printf '   %sWaiting for Python to finish installing (a few minutes)… Ctrl-C to cancel.%s\n' "$DIM" "$R"
+      tries=0
+      until python3 --version >/dev/null 2>&1; do
+        sleep 5; tries=$((tries + 1))
+        [ $((tries % 12)) -eq 0 ] && printf '   %s…still installing…%s\n' "$DIM" "$R"
+        if [ "$tries" -ge 240 ]; then   # ~20 min cap
+          printf '\n   %sThis is taking a while.%s When it'\''s done, double-click this app again.\n\n' "$B" "$R"
+          exit 0
+        fi
+      done
+      printf '   %s✓ Python is ready — continuing.%s\n\n' "$GREEN" "$R"
       ;;
     *)
       printf '   %sOK, skipping — the automatic tracking stays off until Python is installed.%s\n\n' "$DIM" "$R"

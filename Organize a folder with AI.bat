@@ -66,11 +66,25 @@ if errorlevel 1 (
   exit /b 0
 )
 echo    Installing Python via winget...
-winget install -e --id Python.Python.3 --accept-source-agreements --accept-package-agreements
+winget install -e --id Python.Python.3.13 --accept-source-agreements --accept-package-agreements
+if errorlevel 1 (
+  echo    winget couldn't install it -- opening the download page instead...
+  start "" "https://www.python.org/downloads/"
+  echo    After installing, close this window and double-click again.
+  pause
+  exit /b 0
+)
+REM Refresh PATH from the registry (winget wrote Python there) so THIS window sees it.
+for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')"`) do set "PATH=%%P"
+where python >nul 2>nul || where python3 >nul 2>nul
+if errorlevel 1 (
+  echo    Python installed -- please close this window and double-click again.
+  pause
+  exit /b 0
+)
+echo    Python is ready -- continuing...
 echo(
-echo    Done. Please close this window and double-click again.
-pause
-exit /b 0
+goto py_ok
 :py_skip
 echo    OK, skipping -- tracking stays off until Python is installed.
 echo(
