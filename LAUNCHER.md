@@ -17,9 +17,26 @@ Which assistant do you want to use?
 [2] Codex         — not installed, I'll help you set it up
 ```
 
-Pick an **installed** one → it opens the chat in the folder. Pick a **not-installed** one → it prints a short
-note and **opens that assistant's official setup page in the browser** (no dead-end error). The `.bat` also
-falls back to `wsl claude` if Claude Code is picked but only present inside WSL.
+Pick an **installed** one → it opens the chat in the folder. Pick a **not-installed** one → it offers to
+**install it for the user right there**: `Install it now? [y] yes / [n] just show me the steps`.
+
+- **y** → runs that assistant's **official installer** for this OS, then opens it (which walks the user through
+  sign-in). If the freshly installed command isn't visible to the open window yet, it says *"Installed! Close
+  this window and double-click again"* (the honest PATH fallback).
+- **n** → prints the exact one-line install command and opens the official setup page in the browser.
+
+The `.bat` also falls back to `wsl claude` if Claude Code is picked but only present inside WSL.
+
+**Official installers used (verified):**
+
+| | Claude Code | Codex |
+|---|---|---|
+| macOS/Linux | `curl -fsSL https://claude.ai/install.sh \| bash` | `curl -fsSL https://chatgpt.com/codex/install.sh \| sh` |
+| Windows | `irm https://claude.ai/install.ps1 \| iex` | `irm https://chatgpt.com/codex/install.ps1 \| iex` |
+| Docs | code.claude.com/docs/en/quickstart | learn.chatgpt.com/docs/codex/cli |
+
+Running either assistant for the first time triggers its interactive sign-in, so install → launch → sign-in is
+one continuous flow. If you update these commands, change them in **both** launcher files.
 
 ## How to deploy (loop step 6)
 
@@ -45,8 +62,9 @@ falls back to `wsl claude` if Claude Code is picked but only present inside WSL.
 - Print a warm English greeting + two or three example questions.
 - **Detect which assistants are installed** (`claude`, `codex`) and **always show the `[1]/[2]` picker**,
   labelling each as installed or not.
-- On a pick: open the chosen assistant in the folder if installed; otherwise open its official setup page in
-  the browser (`open` on macOS, `start` on Windows) and pause with a friendly note.
+- On a pick: open the chosen assistant in the folder if installed; otherwise **offer to auto-install it**
+  (official installer for this OS), then launch it for sign-in — or, if declined, show the command and open the
+  official guide (`open` on macOS, `start` on Windows).
 - Print a friendly goodbye when the chat ends.
 
 Keep the banner short and human. The tone of the **chat itself** is set separately by the
@@ -59,8 +77,10 @@ Keep the banner short and human. The tone of the **chat itself** is set separate
   - **macOS / Gatekeeper:** *"unidentified developer"* → **right-click the file → Open → Open.**
   - Removing this permanently needs a paid code-signing certificate — usually not worth it. Just tell them the
     one click to get past it.
-- **It does not install or log in the assistant.** First ever run still needs `claude` or `codex` installed and
-  authenticated once. The launcher removes daily friction, not the one-time setup.
+- **Auto-install downloads and runs the vendor's official installer** (`curl … | bash` / `irm … | iex`) after
+  a y/n consent, and needs a network connection. It does **not** handle sign-in — the assistant's own first-run
+  flow does that. And because a new install may not be on the open window's `PATH`, the user sometimes has to
+  **close and reopen** once before the first chat.
 - **It's still a terminal underneath.** The banner + `clear` make it calm and friendly, but it renders as a
   clean terminal chat, not a rounded web-bubble UI. That ceiling is inherent; a real web UI is a different,
   much heavier project and generally worse than the `claude` chat it would wrap.

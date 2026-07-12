@@ -33,15 +33,15 @@ printf '\n'
 printf '   %s────────────────────────────────────────────%s\n' "$DIM" "$R"
 printf '\n'
 
-# Which assistants are installed?
-have_claude=0; command -v claude >/dev/null 2>&1 && have_claude=1
-have_codex=0;  command -v codex  >/dev/null 2>&1 && have_codex=1
+have() { command -v "$1" >/dev/null 2>&1; }
+have_claude=0; have claude && have_claude=1
+have_codex=0;  have codex  && have_codex=1
 
 status() {  # $1 = installed flag
   if [ "$1" -eq 1 ]; then
     printf '%s✓ installed%s' "$GREEN" "$R"
   else
-    printf "%s— not installed, I'll help you set it up%s" "$DIM" "$R"
+    printf "%s— not installed, I can set it up%s" "$DIM" "$R"
   fi
 }
 
@@ -53,26 +53,51 @@ printf '   Type 1 or 2 and press Enter: '
 read -r choice
 printf '\n'
 
-open_guide() {  # $1 = name, $2 = url
-  printf "   %s isn't installed yet.%s Opening the setup guide in your browser…\n" "$B$1" "$R"
-  printf '   %s%s%s\n\n' "$BLUE" "$2" "$R"
-  open "$2" >/dev/null 2>&1
-  printf '   First-time setup is easiest with a technical colleague. Once it'\''s\n'
-  printf '   installed, just double-click here again.\n\n'
-  printf '   %s(You can close this window.)%s\n\n' "$DIM" "$R"
-}
-
 case "$choice" in
-  2) sel=codex ;;
-  *) sel=claude ;;
+  2) sel=codex;  name="Codex";       installed=$have_codex
+     install_cmd='curl -fsSL https://chatgpt.com/codex/install.sh | sh'
+     docs='https://learn.chatgpt.com/docs/codex/cli' ;;
+  *) sel=claude; name="Claude Code"; installed=$have_claude
+     install_cmd='curl -fsSL https://claude.ai/install.sh | bash'
+     docs='https://code.claude.com/docs/en/quickstart' ;;
 esac
 
-if [ "$sel" = codex ]; then
-  if [ "$have_codex" -eq 1 ]; then codex
-  else open_guide "Codex" "https://developers.openai.com/codex"; exit 0; fi
+launch() { if [ "$sel" = codex ]; then codex; else claude; fi; }
+
+if [ "$installed" -eq 1 ]; then
+  launch
 else
-  if [ "$have_claude" -eq 1 ]; then claude
-  else open_guide "Claude Code" "https://claude.com/claude-code"; exit 0; fi
+  printf "   %s%s isn't installed yet.%s I can set it up for you, right here.\n" "$B" "$name" "$R"
+  printf '   Install it now?  %s[y]%s yes   /   %s[n]%s no, just show me the steps: ' "$B" "$R" "$B" "$R"
+  read -r ans
+  printf '\n'
+  case "$ans" in
+    y|Y|s|S|yes|sim)
+      printf '   %sInstalling %s… this can take a minute.%s\n\n' "$DIM" "$name" "$R"
+      eval "$install_cmd"
+      # Let this session see the freshly installed command.
+      export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:$PATH"
+      hash -r 2>/dev/null
+      if have "$sel"; then
+        printf '\n   %sInstalled!%s Opening it now — the first time, it will ask you to sign in.\n\n' "$GREEN" "$R"
+        launch
+      else
+        printf '\n   %sInstalled!%s Please %sclose this window and double-click again%s to start.\n' "$GREEN" "$R" "$B" "$R"
+        printf '   %s(That just lets your computer see the newly installed app.)%s\n\n' "$DIM" "$R"
+        exit 0
+      fi
+      ;;
+    *)
+      printf '   No problem. Here are the steps:\n\n'
+      printf '   1) Open the %sTerminal%s app.\n' "$B" "$R"
+      printf '   2) Paste this line and press Enter:\n\n'
+      printf '      %s%s%s\n\n' "$BLUE" "$install_cmd" "$R"
+      printf '   3) When it finishes, come back and double-click here again.\n\n'
+      printf "   I'll also open the official guide in your browser…\n\n"
+      open "$docs" >/dev/null 2>&1
+      exit 0
+      ;;
+  esac
 fi
 
 # Friendly goodbye when the conversation ends.

@@ -35,9 +35,9 @@ where claude >nul 2>nul && set HAVE_CLAUDE=1
 set HAVE_CODEX=0
 where codex >nul 2>nul && set HAVE_CODEX=1
 
-set "S1=not installed - I'll help you set it up"
+set "S1=not installed, I can set it up"
 if "%HAVE_CLAUDE%"=="1" set "S1=installed"
-set "S2=not installed - I'll help you set it up"
+set "S2=not installed, I can set it up"
 if "%HAVE_CODEX%"=="1" set "S2=installed"
 
 REM Always show the picker, marking what's installed.
@@ -47,30 +47,48 @@ echo    [1] Claude Code   %S1%
 echo    [2] Codex         %S2%
 echo(
 choice /c 12 /n /m "   Type 1 or 2: "
-if errorlevel 2 goto pick_codex
-goto pick_claude
+if errorlevel 2 goto sel_codex
 
-:pick_claude
+:sel_claude
 if "%HAVE_CLAUDE%"=="1" ( claude & goto done )
 where wsl >nul 2>nul && ( wsl claude & goto done )
-set "GNAME=Claude Code"
-set "GURL=https://claude.com/claude-code"
-goto guide
+set "DOCS=https://code.claude.com/docs/en/quickstart"
+echo(
+echo    Claude Code isn't installed yet. I can set it up for you.
+choice /c yn /n /m "   Install it now? [y] yes  /  [n] just show me the guide: "
+if errorlevel 2 goto guide
+echo(
+echo    Installing Claude Code... this can take a minute.
+echo(
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://claude.ai/install.ps1 | iex"
+goto installed_reopen
 
-:pick_codex
+:sel_codex
 if "%HAVE_CODEX%"=="1" ( codex & goto done )
-set "GNAME=Codex"
-set "GURL=https://developers.openai.com/codex"
-goto guide
+set "DOCS=https://learn.chatgpt.com/docs/codex/cli"
+echo(
+echo    Codex isn't installed yet. I can set it up for you.
+choice /c yn /n /m "   Install it now? [y] yes  /  [n] just show me the guide: "
+if errorlevel 2 goto guide
+echo(
+echo    Installing Codex... this can take a minute.
+echo(
+powershell -ExecutionPolicy ByPass -c "irm https://chatgpt.com/codex/install.ps1 | iex"
+goto installed_reopen
+
+:installed_reopen
+echo(
+echo    Installed! Please close this window and double-click again to start.
+echo    (That just lets your computer see the newly installed app.)
+echo(
+pause
+exit /b 0
 
 :guide
 echo(
-echo    %GNAME% isn't installed yet. Opening the setup guide in your browser...
-echo    %GURL%
-start "" "%GURL%"
-echo(
-echo    First-time setup is easiest with a technical colleague.
-echo    Once it's installed, just double-click here again.
+echo    No problem. I'll open the official setup guide in your browser --
+echo    it has the exact command to copy. Once it's installed, double-click here again.
+start "" "%DOCS%"
 echo(
 pause
 exit /b 0
