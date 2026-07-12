@@ -1,36 +1,54 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────
 # Organize a folder with AI
-# Double-click, pick a folder, pick an assistant, and watch the
-# AI set that folder up to be navigable and self-updating.
-# Carries its own skill, so it installs itself on first run.
+# Double-click, pick a folder and an assistant, and watch the AI
+# organize that folder for you. No coding knowledge needed.
+# Self-installs on first run: uses the skill sitting next to it if
+# you have the whole repo, otherwise downloads it from GitHub. So
+# you can hand someone JUST this file and it still works.
 # (agent-friendly-knowledge-docs)
 # ─────────────────────────────────────────────────────────────
 
-SKILL_DIR="$(cd "$(dirname "$0")" && pwd)"   # this folder IS the skill
 SKILL_NAME="agent-friendly-knowledge-docs"
+SKILL_DIR="$(cd "$(dirname "$0")" && pwd)"
+TARBALL="https://github.com/catu46/${SKILL_NAME}/archive/refs/heads/main.tar.gz"
+SKILL_HOME="$HOME/.agents/skills/$SKILL_NAME"
 
 clear
 if [ -t 1 ]; then
   B=$'\033[1m'; DIM=$'\033[2m'; BLUE=$'\033[38;5;68m'; GREEN=$'\033[38;5;71m'; R=$'\033[0m'
-else
-  B=""; DIM=""; BLUE=""; GREEN=""; R=""
-fi
+else B=""; DIM=""; BLUE=""; GREEN=""; R=""; fi
 
 printf '\n   %s%sLet'\''s organize a folder with AI 🗂️%s\n\n' "$B" "$BLUE" "$R"
-printf '   I'\''ll set up a folder of yours so any AI assistant can navigate it\n'
-printf '   and keep it updated. Two clicks: pick the folder, pick the assistant.\n\n'
+printf '   I'\''ll set up a folder of yours so AI can navigate it and keep it\n'
+printf '   organized. Two clicks: pick the folder, pick the assistant.\n\n'
 printf '   %s──────────────────────────────────────────────%s\n\n' "$DIM" "$R"
 
-# 1) Install the skill for BOTH assistants (idempotent — safe to repeat).
-for base in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
-  mkdir -p "$base"
-  if [ ! -e "$base/$SKILL_NAME" ]; then
-    ln -s "$SKILL_DIR" "$base/$SKILL_NAME" 2>/dev/null \
-      && printf '   %s✓ installed the skill%s (%s)\n' "$GREEN" "$R" "$base"
+# 1) Install the skill for both assistants (idempotent).
+if [ -f "$SKILL_DIR/SKILL.md" ]; then
+  # Running from inside the skill repo → link this copy.
+  for base in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
+    mkdir -p "$base"
+    [ -e "$base/$SKILL_NAME" ] || ln -s "$SKILL_DIR" "$base/$SKILL_NAME" 2>/dev/null
+  done
+else
+  # Handed as a standalone file → download the skill once from GitHub.
+  if [ ! -d "$SKILL_HOME" ]; then
+    printf '   %sSetting up for the first time (one-time download)…%s\n' "$DIM" "$R"
+    mkdir -p "$HOME/.agents/skills"
+    TMP="$(mktemp -d)"
+    if curl -fsSL "$TARBALL" | tar -xz -C "$TMP" 2>/dev/null && [ -d "$TMP/${SKILL_NAME}-main" ]; then
+      mv "$TMP/${SKILL_NAME}-main" "$SKILL_HOME"; rm -rf "$TMP"
+      printf '   %s✓ ready%s\n\n' "$GREEN" "$R"
+    else
+      rm -rf "$TMP"
+      printf '\n   %sCouldn'\''t download.%s Check your internet and try again.\n\n' "$B" "$R"
+      exit 1
+    fi
   fi
-done
-printf '\n'
+  mkdir -p "$HOME/.claude/skills"
+  [ -e "$HOME/.claude/skills/$SKILL_NAME" ] || ln -s "$SKILL_HOME" "$HOME/.claude/skills/$SKILL_NAME"
+fi
 
 # 2) Native folder picker.
 printf '   Opening a window to choose the folder…\n'
@@ -44,43 +62,34 @@ fi
 TARGET="${TARGET%/}"
 printf '   %sFolder:%s %s\n\n' "$B" "$R" "$TARGET"
 
-# 3) Which assistant? (both can run this skill natively)
+# 3) Which assistant?
 have() { command -v "$1" >/dev/null 2>&1; }
 have_claude=0; have claude && have_claude=1
 have_codex=0;  have codex  && have_codex=1
 status() { if [ "$1" -eq 1 ]; then printf '%s✓ installed%s' "$GREEN" "$R"; else printf "%s— not installed%s" "$DIM" "$R"; fi; }
 
-printf '   %sWhich assistant should apply it?%s\n\n' "$B" "$R"
+printf '   %sWhich assistant should organize it?%s\n\n' "$B" "$R"
 printf '   %s[1]%s Claude Code   ' "$B" "$R"; status "$have_claude"; printf '\n'
 printf '   %s[2]%s Codex         ' "$B" "$R"; status "$have_codex";  printf '\n\n'
 printf '   Type 1 or 2 and press Enter: '
 read -r choice
 printf '\n'
-case "$choice" in 2) sel=codex; installed=$have_codex ;; *) sel=claude; installed=$have_claude ;; esac
+case "$choice" in 2) sel=codex; name="Codex"; installed=$have_codex; url="https://learn.chatgpt.com/docs/codex/cli" ;;
+                  *) sel=claude; name="Claude Code"; installed=$have_claude; url="https://claude.com/claude-code" ;; esac
 
 if [ "$installed" -ne 1 ]; then
-  printf "   %sThat assistant isn'\''t installed yet.%s Install it once, then run this again:\n" "$B" "$R"
-  if [ "$sel" = codex ]; then
-    printf '   %shttps://learn.chatgpt.com/docs/codex/cli%s\n\n' "$BLUE" "$R"
-    open "https://learn.chatgpt.com/docs/codex/cli" >/dev/null 2>&1
-  else
-    printf '   %shttps://claude.com/claude-code%s\n\n' "$BLUE" "$R"
-    open "https://claude.com/claude-code" >/dev/null 2>&1
-  fi
-  printf '   %s(You can close this window.)%s\n\n' "$DIM" "$R"
+  printf "   %s%s isn'\''t installed yet.%s Install it once, then run this again:\n" "$B" "$name" "$R"
+  printf '   %s%s%s\n\n' "$BLUE" "$url" "$R"
+  open "$url" >/dev/null 2>&1
   exit 0
 fi
 
-# 4) Apply the skill inside the chosen folder — the user watches it work.
+# 4) Apply the skill inside the chosen folder.
 cd "$TARGET" || { printf '   Could not open that folder.\n'; exit 1; }
 PROMPT="Use the $SKILL_NAME skill to organize this folder (the current directory) so an AI can navigate it and keep it updated. Interview me in my language, then set it up."
-printf '   %sApplying the skill in your folder now — watch below.%s\n' "$GREEN" "$R"
-printf '   %s(If it just opens a chat, paste this: "organize this folder for AI".)%s\n\n' "$DIM" "$R"
+printf '   %sOrganizing your folder now — watch below.%s\n' "$GREEN" "$R"
+printf '   %s(If it just opens a chat, type: "organize this folder for AI".)%s\n\n' "$DIM" "$R"
 
-if [ "$sel" = codex ]; then
-  codex "$PROMPT"
-else
-  claude "$PROMPT"
-fi
+if [ "$sel" = codex ]; then codex "$PROMPT"; else claude "$PROMPT"; fi
 
 printf '\n   %sDone! Your folder is set up. You can close this window 👋%s\n\n' "$BLUE" "$R"
