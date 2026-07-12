@@ -29,6 +29,32 @@ echo(
 echo    --------------------------------------------------
 echo(
 
+REM Python powers the "what changed" check below. Offer to install it if missing;
+REM whatever happens, continue to the chat.
+set HAVE_PY=0
+where python  >nul 2>nul && set HAVE_PY=1
+where python3 >nul 2>nul && set HAVE_PY=1
+if "%HAVE_PY%"=="1" goto tpy_ok
+echo    Python isn't installed -- it powers the automatic change-tracking.
+choice /c yn /n /m "   Install it now? [y] yes / [n] skip: "
+if errorlevel 2 goto tpy_skip
+where winget >nul 2>nul
+if errorlevel 1 (
+  echo    winget isn't available -- opening the Python download page...
+  start "" "https://www.python.org/downloads/"
+  goto tpy_ok
+)
+echo    Installing Python via winget...
+winget install -e --id Python.Python.3.13 --accept-source-agreements --accept-package-agreements
+if errorlevel 1 ( start "" "https://www.python.org/downloads/" & goto tpy_ok )
+for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')"`) do set "PATH=%%P"
+echo    Done.
+goto tpy_ok
+:tpy_skip
+echo    OK -- chatting now; tracking turns on once Python is installed.
+echo(
+:tpy_ok
+
 REM Forcing gate (works for Claude Code AND Codex): if the files changed since the
 REM docs were last updated, nudge the user to catch up first.
 if exist ".claude\hooks\snapshot.py" (

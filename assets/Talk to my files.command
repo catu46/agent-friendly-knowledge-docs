@@ -33,6 +33,30 @@ printf '\n'
 printf '   %s────────────────────────────────────────────%s\n' "$DIM" "$R"
 printf '\n'
 
+# Python powers the "what changed" check below. Offer to install it if missing;
+# if declined or slow, just continue to the chat (tracking turns on later).
+if ! command -v python3 >/dev/null 2>&1; then
+  printf '   %sPython isn'\''t installed%s — it powers the automatic change-tracking.\n' "$B" "$R"
+  printf '   Install it now?  %s[y]%s yes   /   %s[n]%s skip: ' "$B" "$R" "$B" "$R"
+  read -r pyans
+  printf '\n'
+  case "$pyans" in
+    y|Y|s|S|yes|sim)
+      printf '   %sOpening the macOS installer for Python…%s click "Install" and let it run.\n' "$DIM" "$R"
+      xcode-select --install 2>/dev/null || true
+      printf '   %sWaiting for it to finish… Ctrl-C to skip and just chat.%s\n' "$DIM" "$R"
+      tries=0
+      until python3 --version >/dev/null 2>&1; do
+        sleep 5; tries=$((tries + 1))
+        [ $((tries % 12)) -eq 0 ] && printf '   %s…still installing…%s\n' "$DIM" "$R"
+        [ "$tries" -ge 240 ] && break
+      done
+      command -v python3 >/dev/null 2>&1 && printf '   %s✓ Python is ready.%s\n\n' "$GREEN" "$R"
+      ;;
+    *) printf '   %sOK — chatting now; tracking turns on once Python is installed.%s\n\n' "$DIM" "$R" ;;
+  esac
+fi
+
 # Forcing gate (works for Claude Code AND Codex): if the files changed since the
 # docs were last updated, nudge the user to catch up first.
 if [ -f ".claude/hooks/snapshot.py" ]; then
