@@ -1,6 +1,6 @@
 ---
 name: agent-friendly-knowledge-docs
-description: Make a folder tree of DOCUMENTS agent-navigable and self-maintaining — decks, spreadsheets, PDFs, proposals, notes filed by topic on a computer, Drive, or SharePoint. For non-engineers (consultants, managers, analysts) who edit files outside any IDE. Scaffolds a thin AGENTS.md router + CLAUDE.md stub + a readable index.md + append-only log.md per folder, drops a one-click "talk to my files" launcher in the top folder, proves it with a fresh-eyes test, and arms a watcher that keeps the docs current when files change outside Claude Code (new deck, Excel saved as v8, a Drive/SharePoint rename). Deliberately simple — one index per folder, no knowledge-graph, no versioned concept bundles, no mode question; folders of CODE/SQL/operational models that RUN belong to the sibling skill agent-friendly-docs. Triggers: "organize my documents/folders for AI", "make my folders agent-friendly", "index.md per folder", "mother CLAUDE.md", "talk to my files launcher", "reconciliation watcher for docs", "AGENTS.md for documents", "Drive/SharePoint docs for AI".
+description: Make a folder tree of DOCUMENTS agent-navigable and self-maintaining — decks, spreadsheets, PDFs, proposals, notes filed by topic on a computer, Drive, or SharePoint. For non-engineers (consultants, managers, analysts) who edit files outside any IDE. Scaffolds a thin AGENTS.md router + CLAUDE.md stub + a readable index.md + append-only log.md per folder, drops a one-click "talk to my files" launcher in the top folder, proves it with a fresh-eyes test, and keeps the docs current by CATCHING UP ON WHAT CHANGED whenever the user opens the folder — a new deck, an Excel re-saved with new numbers, a Drive/SharePoint rename — driven by a persistent per-folder snapshot, with NO background job (an unattended scheduled watcher is optional/v2). Deliberately simple — one index per folder, no knowledge-graph, no versioned concept bundles, no mode question; folders of CODE/SQL/operational models that RUN belong to the sibling skill agent-friendly-docs. Triggers: "organize my documents/folders for AI", "make my folders agent-friendly", "index.md per folder", "mother CLAUDE.md", "talk to my files launcher", "what changed while I was away", "keep my docs updated", "AGENTS.md for documents", "Drive/SharePoint docs for AI".
 ---
 
 # Agent-Friendly Knowledge Docs
@@ -130,10 +130,25 @@ reading reveals WHAT IS; the human reveals WHAT MATTERS and WHAT'S STILL TRUE.
 3. **Re-interview**, sharper and evidence-based: *"you said the Q3 model is canonical, but there's v8,
    v8_FINAL, v8_FINAL_real — which? this note claims X but the deck shows Y — stale?"*
 4. **Read deeper → converge.** Usually 2–3 rounds. Stop when reading stops surprising and the human confirms.
-5. **PROPOSE → BUILD.** Propose the tree, confirm, then build: for each meaningful folder write `AGENTS.md`
-   + the `CLAUDE.md` stub + `index.md` + `log.md`, wire the cross-links, embed the self-update protocol,
-   write `.okf-state.json`. **Open [shape-basic.md](shape-basic.md)** for the exact blocks.
-   **Done when** every meaningful folder has all five files and `validate.py` passes.
+5. **PROPOSE → BUILD.** Propose the tree, confirm, then build each **meaningful folder**. For each: write
+   `AGENTS.md` (the **root** one also gets the root-variant up-pointer + the tone block + the catch-up block)
+   + the `CLAUDE.md` stub + `index.md` + `log.md`, wire the cross-links, then set the change-memory with the
+   bundled generator: `python3 <skill-dir>/scripts/snapshot.py write <folder>` (writes `.okf-state.json` — do
+   **not** hand-author it). `<skill-dir>` is this skill's own directory. **Open [shape-basic.md](shape-basic.md)**
+   for the exact blocks. Then run the shape gate: `python3 <skill-dir>/scripts/validate.py <tree>`.
+   **Done when** every meaningful folder has all five files and `validate.py` passes with 0 errors.
+   - **Meaningful folder =** a folder that **directly holds real artifacts a person opens** (a deck, sheet, PDF,
+     doc, dataset). NOT a pure container of only subfolders, and NOT a system/asset dir. Each meaningful folder
+     gets the five files.
+   - **Deliberately skipping a folder?** (a raw dump, an `inputs/` you were told to ignore) — add it to a root
+     **`.okfignore`** (one glob per line). Otherwise `validate.py` correctly flags it as an undocumented content
+     folder and the gate fails. Skip = ignore it, don't half-document it.
+   - **Single flat folder?** Then the root **is** both the router and the only content folder: it gets its own
+     `index.md` + `log.md` like any folder (not a bare router).
+   - **Pre-existing versions at setup** (a folder handed to you already holding `model_v7` **and** `model_v8`):
+     list the current one in `## What's here`, move the old one to `_archive/` (confirm first — it touches a
+     user original), and note the "why" under `## Decisions` if the user can tell you it. This is initial state,
+     not a change event — no `log.md` line is required for what was already there.
 6. **Hang the front door — drop the launcher.** In the **mother (root) folder**, drop the one-click launcher
    so the user can start talking to the tree without a terminal. Details and the exact files:
    **[LAUNCHER.md](LAUNCHER.md).** Confirm before adding it. **Done when** the launcher sits in the root,
@@ -145,19 +160,23 @@ reading reveals WHAT IS; the human reveals WHAT MATTERS and WHAT'S STILL TRUE.
    representative task; (b) flag anything it could **not** determine. Whatever it stumbles on is a **real gap**
    → fix the docs and re-verify. `validate.py` checks the **shape**; this checks **comprehension** — ship only
    when both pass.
-8. **Arm the watcher — the handoff to self-maintenance.** Once the tree passes shape + comprehension, arm the
-   daily reconciliation so the docs self-feed from day one: `scripts/arm-watcher.sh <tree> --install`
-   (runner-agnostic; pick the backend for the source — git / Drive / SharePoint / plain folder). **Confirm
-   before installing a scheduled job** (see [WATCHER.md](WATCHER.md)). **Done when** the dry-run cron line
-   has been shown and, on the user's OK, installed.
+8. **Arm self-maintenance — the catch-up protocol (reconcile-on-open).** No background job, no cron. The
+   `.okf-state.json` snapshot you wrote in step 5 **persists between sessions**, so a future chat can diff the
+   folder against it and tell the user *what changed since they were last here* — driven simply by the user
+   opening the folder and asking (or the assistant offering). This is what makes the north-star loop self-feed
+   for a laptop user who is only ever present interactively. Embed the **Catch up on changes** block in the root
+   `AGENTS.md` (in [shape-basic.md](shape-basic.md)); it drives `snapshot.py diff` then `snapshot.py write`.
+   **Done when** the root `AGENTS.md` carries the catch-up block and `.okf-state.json` exists. *(A scheduled,
+   fully-unattended watcher is **v2 / optional**, [WATCHER.md](WATCHER.md) — it has real limits on a laptop and
+   is NOT the default.)*
 
 **At scale (hundreds of folders), DECENTRALIZE:** one subagent per leaf folder writes that folder's docs; roll
 summaries leaf → mid → root so no context ever holds the whole tree.
 
 **Keep this current** (embedded in every `AGENTS.md`): after real changes, update this folder's `index.md` +
-APPEND to `log.md` + restamp `timestamp`; and when you **CREATE a new meaningful folder, scaffold its docs
-before you finish** (`CLAUDE.md` + `AGENTS.md` + `index.md` + `log.md`) — so the tree never grows a blind spot.
-Change only what the edit touched.
+APPEND to `log.md` + restamp `timestamp`, then refresh the change-memory (`snapshot.py write <folder>`); and
+when you **CREATE a new meaningful folder, scaffold its docs before you finish** (`CLAUDE.md` + `AGENTS.md` +
+`index.md` + `log.md` + snapshot) — so the tree never grows a blind spot. Change only what the edit touched.
 
 ---
 
@@ -186,23 +205,43 @@ under it. That is the point — pair it with the confirmation-before-destructive
 
 ---
 
-## Self-maintenance: the reconciliation watcher (+ new-folder discovery)
+## Self-maintenance: reconcile-on-open (the default — no background job)
 
-How the docs self-feed when people edit **outside** Claude Code. Each scheduled run:
+How the docs self-feed when people edit files **outside** Claude Code (saving an Excel over itself, dropping a
+new deck into Drive, renaming in SharePoint). The mechanism is **lazy and interactive**, not scheduled — which
+is exactly right for the audience: a consultant on a laptop who is only ever *present* when the chat is open,
+already signed in, no headless auth or cron-on-a-sleeping-machine to fail silently.
 
-1. **Discovers new scopes.** Scan for meaningful folders that have real artifacts but no `AGENTS.md`/snapshot
-   → scaffold them (same flat shape), so a folder created after setup doesn't stay a blind spot. If a new
-   folder is ambiguous, **queue an ask** instead of guessing.
-2. **Reconciles known scopes.** A snapshot (`.okf-state.json`, per-file `sha256`) diffs the filesystem (and/or
-   `git diff`, and/or a source API's "modified by/at") to find added/modified/deleted files, classifies each by
-   **reading** it (data-refresh → maybe no change; v7→v8 → repoint + archive; new file → add a line; deletion
-   → mark removed), applies the update **append-only**, and rewrites the snapshot.
-3. **Reports** `validate.py` PASS/FAIL.
-4. **Asks when unsure** — never guesses; attributes the last editor honestly per source.
+**What makes it work:** the `.okf-state.json` snapshot **persists between sessions**. So when the user next
+opens the folder, the assistant can diff the folder against the last known state and see everything that
+changed in the meantime — even across weeks nobody touched the chat.
 
-Honest limits: scheduled = **next run, not instant** (work agentically for live updates); only **meaningful**
-folders are scaffolded; clear cases auto-apply, ambiguous cases ask. Full spec + the copy-paste agent prompt:
-**[WATCHER.md](WATCHER.md).**
+The **Catch up on changes** protocol (embedded in the root `AGENTS.md`, block in
+[shape-basic.md](shape-basic.md)) runs when the user asks *"what changed while I was away?"* — or proactively,
+when the assistant notices the snapshot is stale on opening. Each catch-up:
+
+1. **Detect.** `python3 <skill-dir>/scripts/snapshot.py diff <folder>` → added / modified / renamed / deleted,
+   by `sha256` (so a *re-saved spreadsheet with changed numbers* shows as **modified** — it is NOT filtered out
+   as "cosmetic"; the user decides what matters, in conversation).
+2. **Read & report.** Open each changed file (bounded reads — see *Works for any document*) and tell the user,
+   in plain language, what changed: *"the model was re-saved — revenue row now reads 5.1 vs 4.2; a new deck
+   `pricing_v2` appeared; `report.pdf` is gone."*
+3. **Apply, on the user's OK, append-only.** Update `index.md` (repoint entries, add/remove lines), APPEND one
+   dated line per change to `log.md`, restamp `timestamp`. A rename → repoint the entry (never "deleted + new").
+4. **Refresh the memory.** `python3 <skill-dir>/scripts/snapshot.py write <folder>` so the next catch-up starts
+   clean.
+5. **New folders.** If a new meaningful folder appeared with no docs, scaffold it (same five files + snapshot).
+6. **When unsure, ASK THE USER — right there in the chat** (they're present); don't defer to a file nobody reads.
+
+**Honest limits (state them):** reconcile happens **when the user opens the folder**, not while they're away —
+if they never open the chat, the docs wait (which is fine: the docs matter exactly when they come back to
+work). A cloud "Files On-Demand" placeholder with no local bytes can't be hashed — keep files "always on this
+device" for reliable diffing (`snapshot.py` warns and falls back to size+mtime).
+
+**v2 / optional — the unattended scheduled watcher.** For a machine that IS always on (a server, an always-on
+desktop), a cron/launchd job can reconcile without anyone present. That's **future/optional**, with real
+caveats (a sleeping laptop never runs it; headless auth + write-permission must be set up or it silently does
+nothing). Full spec + honest limits: **[WATCHER.md](WATCHER.md).**
 
 ---
 

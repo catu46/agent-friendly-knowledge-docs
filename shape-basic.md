@@ -19,13 +19,18 @@ folder/
 - **`log.md` = memory** — every real change appends one dated line (what + why + who). Append-only, so "what
   we used to do" is never overwritten.
 
-Write docs in the **project's language**. Replace every `<placeholder>`. Timestamps are ISO-8601 UTC. The
-`## If you opened only this folder` and `## Keep this current` sections are **mandatory** in every `AGENTS.md`.
-Outer fences are `~~~` so nested ``` blocks render.
+Write everything in **English** (this skill authors all files in English; only the *live chat* mirrors the
+user's language). Replace every `<placeholder>`. Timestamps are ISO-8601 UTC. The `## If you opened only this
+folder` and `## Keep this current` sections are **mandatory** in every `AGENTS.md`. Outer fences are `~~~` so
+nested ``` blocks render.
 
 ---
 
-## 1. `AGENTS.md` (the thin router — root and every folder)
+## 1. `AGENTS.md` (the thin router — every NON-root folder)
+
+This is the template for a **subfolder**. The **root** `AGENTS.md` is the same but swaps the up-pointer and
+adds two blocks — see **§1b**. (Do NOT paste this verbatim at the root: its `../AGENTS.md` link does not
+resolve there and `validate.py` fails.)
 
 ~~~md
 ---
@@ -48,23 +53,34 @@ This folder's knowledge → [`./index.md`](./index.md). History → [`./log.md`]
 
 ## If you opened only this folder
 Global rules and the parent map → [`../AGENTS.md`](../AGENTS.md). Read it before acting if it isn't already
-in context. (At the repo root there is no `../AGENTS.md`: KEEP this heading but reword it to state this IS
-the root.)
+in context.
 
 ## Keep this current
 After changing anything here, before you finish: update the relevant part of `index.md`, **append** one line
-to `log.md`, and restamp `timestamp`. **Never overwrite history** (log is append-only). Created a new
-meaningful subfolder? Scaffold it (CLAUDE.md + AGENTS.md + index.md + log.md) before finishing — no blind
-spots. Then walk up to `../AGENTS.md` only if the change affects global rules or the map.
+to `log.md`, restamp `timestamp`, then refresh the change-memory (`snapshot.py write .`). **Never overwrite
+history** (log is append-only). Created a new meaningful subfolder? Scaffold it (CLAUDE.md + AGENTS.md +
+index.md + log.md + snapshot) before finishing — no blind spots. Then walk up to `../AGENTS.md` only if the
+change affects global rules or the map.
 ~~~
 
 ---
 
-## 1b. Root-only add-on: `## How to talk to the user` (the tone block)
+## 1b. The ROOT `AGENTS.md` — three differences
 
-Add this section to the **root** `AGENTS.md` **only** (it sets the voice for the whole tree). It makes the
-in-app chat feel like a friendly assistant instead of a developer tool — the reason a non-technical person can
-use the launcher without being scared.
+The root uses the §1 template with **three changes**. (1) Its up-pointer says it IS the root — no
+`../AGENTS.md` link (that link would not resolve and fails `validate.py`). It also carries two root-only
+blocks that set the voice and the self-maintenance for the whole tree.
+
+**(1) Replace `## If you opened only this folder` with:**
+
+~~~md
+## This is the top of the tree
+You are at the root. There is no parent — the global rules above apply to everything below. Each subfolder has
+its own `AGENTS.md` with its local rules.
+~~~
+
+**(2) Add `## How to talk to the user`** (the tone block — makes the in-app chat feel like a friendly assistant
+instead of a developer tool; the reason a non-technical person can use the launcher without being scared):
 
 ~~~md
 ## How to talk to the user
@@ -74,6 +90,24 @@ use the launcher without being scared.
   For safe, reversible actions (reading, summarizing, creating a new file), go ahead.
 - If something is ambiguous (which version? which client?), **ask** instead of guessing.
 - Never touch anything listed under "Do NOT touch".
+~~~
+
+**(3) Add `## Catch up on changes`** (the self-maintenance protocol — how the docs stay current with edits made
+outside the chat; runs when the user asks, or proactively when the snapshot looks stale on opening):
+
+~~~md
+## Catch up on changes
+When the user opens this folder — especially if it's been a while — or asks "what changed?", reconcile the
+docs with the real files before doing anything else that depends on them:
+1. Run `python3 <skill-dir>/scripts/snapshot.py diff .` in each folder to see added / modified / renamed /
+   deleted files since the last snapshot. (`<skill-dir>` = where this skill lives.)
+2. For each change, open the file (bounded read) and tell the user in plain words what changed — including
+   changed numbers in a re-saved spreadsheet; do NOT dismiss those as cosmetic.
+3. On the user's OK, update `index.md` (repoint/add/remove entries), APPEND one dated line per change to
+   `log.md`, and restamp `timestamp`. A rename → repoint the entry, don't record it as delete + new.
+4. Refresh the memory: `python3 <skill-dir>/scripts/snapshot.py write .`.
+5. If a new folder of documents appeared with no docs, scaffold it (CLAUDE.md + AGENTS.md + index.md + log.md
+   + snapshot). When anything is unclear, ASK the user here in the chat — don't guess, don't defer to a file.
 ~~~
 
 ---
@@ -161,10 +195,10 @@ your-folder/
 ├── Talk to my files.command   # launcher — drop ONLY the one matching the OS
 │                              #   (.command on Mac, .bat on Windows). See LAUNCHER.md.
 ├── CLAUDE.md            # @AGENTS.md
-├── AGENTS.md            # thin router (Rules + pointers + Keep current + tone block at root)
+├── AGENTS.md            # thin router (Rules + pointers + Keep current; root adds tone + catch-up)
 ├── index.md            # the folder's knowledge (inline)
 ├── log.md              # append-only history
-├── .okf-state.json     # watcher snapshot
+├── .okf-state.json     # change-memory snapshot (written by snapshot.py)
 ├── _archive/           # old artifacts kept for recall (e.g. model_q3_v7.xlsx)
 └── subfolder/          # every meaningful subfolder is self-contained:
     ├── CLAUDE.md       #   open it alone and its context still auto-loads

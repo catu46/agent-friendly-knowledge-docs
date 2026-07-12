@@ -21,9 +21,12 @@ cabinet, not the machine.
 2. **A one-click launcher — "Talk to my files"** — dropped in the top folder. Double-click it, pick your
    assistant (Claude Code or Codex), and you're talking to your files. No VS Code, no terminal commands. Just
    ask *"summarize the proposal for client X"* or *"which is the latest version of the model?"*
-3. **A watcher that keeps it current** — a scheduled agent that notices when files change *outside* the
-   assistant (a new deck, an Excel saved as `v8`, a rename in Drive) and updates the docs, append-only, on its
-   own.
+3. **Docs that catch up when you open them** — you come back after two weeks, open the chat, and ask *"what
+   changed while I was away?"* A small saved snapshot of each folder lets the assistant see everything that
+   changed *outside* the chat (a new deck, an Excel re-saved with new numbers, a rename in Drive), tell you in
+   plain words, and update `index.md` / `log.md` append-only on your OK. **No background job, no cron** — it
+   runs when you're there. (A fully-unattended scheduled watcher exists as an optional v2 for always-on
+   machines.)
 
 ## Install
 
@@ -55,33 +58,38 @@ Full details: [LAUNCHER.md](LAUNCHER.md).
 > (https://claude.com/claude-code) or Codex (https://developers.openai.com/codex). The launcher removes the
 > daily friction of opening an IDE and typing a command, not the one-time setup.
 
-## The watcher
+## Keeping it current
 
-After setup, arm the reconciliation watcher so the docs self-maintain:
+Nothing to schedule. The assistant catches up whenever you open the folder and ask *"what changed?"* — it
+compares a small saved snapshot (`.okf-state.json`) against the real files and shows you added / modified /
+renamed / deleted, then updates the docs on your OK. Under the hood:
 
 ```bash
-scripts/arm-watcher.sh ~/path/to/your/folder            # dry run — prints the schedule, installs nothing
-scripts/arm-watcher.sh ~/path/to/your/folder --install  # once you're happy, schedule it
+python3 scripts/snapshot.py diff  ~/path/to/your/folder   # what changed since last time
+python3 scripts/snapshot.py write ~/path/to/your/folder   # save the new baseline
 ```
 
-It works over a plain folder, a git checkout, or a synced Drive/SharePoint folder. Full spec:
-[WATCHER.md](WATCHER.md).
+Want fully-unattended updates on an always-on machine (a server)? That's the optional v2 scheduled watcher —
+with honest caveats (a sleeping laptop never runs it): [WATCHER.md](WATCHER.md).
 
 ## How it's built
 
 - **[SKILL.md](SKILL.md)** — the skill itself (the instructions the agent follows).
 - **[shape-basic.md](shape-basic.md)** — the exact files and copy-paste blocks for each folder.
 - **[LAUNCHER.md](LAUNCHER.md)** — the one-click launcher spec.
-- **[WATCHER.md](WATCHER.md)** — the self-maintenance watcher.
+- **[scripts/snapshot.py](scripts/snapshot.py)** — the change-memory (write/diff) that powers "what changed?".
 - **[scripts/validate.py](scripts/validate.py)** — checks the doc shape (Python 3, stdlib only).
-- **[scripts/artifact-diff.py](scripts/artifact-diff.py)** — the materiality gate (structural diff of
-  decks/sheets/PDFs so cosmetic edits don't churn the docs).
+- **[WATCHER.md](WATCHER.md)** + **[scripts/arm-watcher.sh](scripts/arm-watcher.sh)** — the optional v2
+  scheduled watcher (+ `artifact-diff.py`, its materiality gate).
 
 ## Honest limits
 
 - The launcher is a **friendly terminal chat**, not a polished web app — calm and non-scary, but a terminal
   underneath.
-- The watcher is **scheduled, not real-time** — the safety net for edits made outside the assistant.
+- Catch-up runs **when you open the folder**, not while you're away — which is fine, since the docs matter when
+  you come back to work. (The v2 scheduled watcher trades this for real cron/auth caveats.)
+- A cloud **"Files On-Demand"** placeholder with no local bytes can't be hashed — keep files "always on this
+  device" for reliable change-detection.
 - **Attribution depends on the source** — git gives a real author; a plain folder often gives only an OS
   account. The docs never fabricate a name.
 

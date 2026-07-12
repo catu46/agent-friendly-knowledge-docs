@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""validate.py - shape checker for agent-friendly-docs trees (both tiers).
+"""validate.py - shape checker for agent-friendly-knowledge-docs trees.
 
 Stdlib only (no third-party imports); runs anywhere with Python 3.8+.
-Enforces the CONTRACT shapes for an AGENTS.md documentation tree, AUTO-DETECTING
-each meaningful folder's tier per folder:
-  - pro-max shape = a lazy knowledge/ OKF bundle (index.md + concepts + log.md);
-  - basic shape   = a flat index.md (the folder's knowledge) + log.md.
+This skill is BASIC-ONLY: every meaningful folder is a flat `index.md` (the
+folder's knowledge) + `log.md`. The knowledge/-bundle ("pro-max") checks below are
+inherited from the sibling skill agent-friendly-docs and stay DORMANT here — a
+basic-only tree never has a knowledge/ subdir, so those branches never fire. Do
+NOT build a knowledge/ bundle for this skill; if a folder ever needs one, it
+belongs to agent-friendly-docs instead.
+Enforces the CONTRACT shape, AUTO-DETECTING each meaningful folder:
+  - basic shape   = a flat index.md (the folder's knowledge) + log.md;   [this skill]
+  - pro-max shape = a lazy knowledge/ OKF bundle (dormant; sibling skill only).
 Both share the same front door: a thin AGENTS.md router + a one-line "@AGENTS.md"
 CLAUDE.md stub that imports it (Claude Code auto-loads CLAUDE.md, not AGENTS.md;
 the @import pulls AGENTS.md into context at launch). A folder with AGENTS.md but
@@ -430,7 +435,7 @@ def run(root):
 def main(argv):
     parser = argparse.ArgumentParser(
         prog="validate.py",
-        description="Shape checker for agent-friendly-docs (OKF / AGENTS.md) trees. "
+        description="Shape checker for agent-friendly-knowledge-docs (AGENTS.md) trees. "
                     "Stdlib only. Exits 1 only on an ERROR; WARN findings never fail.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="ERROR checks 1-9 and WARN checks 10-14 are documented in the module "
@@ -449,7 +454,7 @@ def main(argv):
 
     md_files = run(root)
 
-    print("agent-friendly-docs :: validate")
+    print("agent-friendly-knowledge-docs :: validate")
     print("root: %s" % root)
     print("markdown files scanned: %d" % len(md_files))
 
