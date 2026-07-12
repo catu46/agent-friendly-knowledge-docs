@@ -206,11 +206,17 @@ in step 1**, because it changes everything downstream:
      ARE, and surface the mess: duplicates & versions (`v8`, `v8_final`, `v8_final_real`), orphans nothing
      references, misfiled items, stale files, inconsistent names, and sprawl / too-deep nesting. Show the user
      what they *actually* have (they're usually surprised).
-  2. **UNDERSTAND the mental model** (interview): *How do you think about this work — by client? project? phase?
-     deliverable type? date?* *When you go looking for something, what do you search by?* (that reveals the
-     natural top level). *Who ELSE uses these folders, and how do THEY look?* (shared Drive/SharePoint — design
-     for them too, not just this user). *What's the lifecycle* (draft → final → sent → archived) and *what's
-     canonical vs scratch?*
+  2. **UNDERSTAND the mental model — a real back-and-forth, not a form.** ASK, listen, then ask **sharper
+     follow-ups** based on the answer; loop until the model is clear. The user drives nothing — YOU ask, they
+     just react. Two rules that make this work for a non-technical person:
+     - **Ground every question in what you found in the MAP** — concrete beats abstract. Not *"how do you think
+       about this work?"* but *"you've got `model_v8` and `model_v8_final` — which is the real one, and how
+       would you have known?"*, *"when you needed the Acme proposal last week, where did you look first?"*
+     - **A few questions at a time**, in plain language — never dump ten at once.
+     What you're digging for: *how do you think about this work (by client? project? phase? deliverable type?);
+     when you go looking for something, what do you search by* (that reveals the natural top level); *who ELSE
+     uses these folders and how do THEY look* (shared Drive/SharePoint — design for them too); *the lifecycle*
+     (draft → final → sent → archived) and *what's canonical vs scratch.*
   3. **DIAGNOSE.** Name the specific problems, framed against that mental model — e.g. *"you think by client,
      but the top level is by file-type, which is why you hunt."* Confirm which problems actually matter; don't
      fix what isn't broken.
