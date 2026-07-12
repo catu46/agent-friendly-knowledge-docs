@@ -1,0 +1,5 @@
+.DS_Store
+*.log
+.okf/.watcher.log
+__pycache__/
+*.pyc
